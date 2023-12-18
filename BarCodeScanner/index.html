@@ -13,7 +13,31 @@
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
     
     <script>
-        const qrCodeScanner = new Html5Qrcode("reader");
+            function onScanSuccess(decodedText, decodedResult) {
+            // Handle the scanned code as you like, for example:
+            console.log(`Code matched = ${decodedText}`, decodedResult);
+            }
+
+            const formatsToSupport = [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.UPC_EAN_EXTENSION,
+            ];
+            const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                formatsToSupport: formatsToSupport
+            },
+            /* verbose= */ false);
+            html5QrcodeScanner.render(onScanSuccess);
+    </script>
+
+
+    <!--script>
+        <const qrCodeScanner = new Html5Qrcode("reader");
         const btnScan = document.getElementById("btn-scan");
         const barcodeValue = document.getElementById("barcodeValue");
     
@@ -32,7 +56,7 @@
                 console.error(`Error scanning: ${err}`);
             });
         };
-    </script>
+    </script-->
     
 </body>
 </html>
