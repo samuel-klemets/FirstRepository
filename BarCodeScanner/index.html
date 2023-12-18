@@ -8,41 +8,19 @@
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">Scan Barcode QR & ITF</button>
+    <button id="btn-scan">Scan Barcode QR & ITF updated</button>
     <div style="width: 500px;" id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
     
     <script>
-            function onScanSuccess(decodedText, decodedResult) {
-            // Handle the scanned code as you like, for example:
-            console.log(`Code matched = ${decodedText}`, decodedResult);
-            }
-
-            const formatsToSupport = [
-            Html5QrcodeSupportedFormats.QR_CODE,
-            Html5QrcodeSupportedFormats.ITF,
-            ];
-            const html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader",
-            {
-                fps: 5,
-                qrbox: { width: 250, height: 250 },
-                formatsToSupport: formatsToSupport
-            },
-            /* verbose= */ false);
-            html5QrcodeScanner.render(onScanSuccess);
-    </script>
-
-
-    <!--script>
         const qrCodeScanner = new Html5Qrcode("reader");
         const btnScan = document.getElementById("btn-scan");
         const barcodeValue = document.getElementById("barcodeValue");
     
         const config = {
-            fps: 10,
+            fps: 5,
             qrbox: 250,
-            formatsToSupport: [Html5QrcodeSupportedFormats.ITF]
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.ITF]
         };
     
         btnScan.onclick = () => {
@@ -54,7 +32,7 @@
                 console.error(`Error scanning: ${err}`);
             });
         };
-    </script-->
+    </script>
     
 </body>
 </html>
