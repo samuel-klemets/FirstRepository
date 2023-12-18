@@ -16,12 +16,13 @@
         const qrCodeScanner = new Html5Qrcode("reader");
         const btnScan = document.getElementById("btn-scan");
         const barcodeValue = document.getElementById("barcodeValue");
+    
         const config = {
-        fps: 10,
-        qrbox: 250,
-        formatsToSupport: [Html5QrcodeSupportedFormats.ITF]
-    };
-
+            fps: 10,
+            qrbox: 250,
+            formatsToSupport: [Html5QrcodeSupportedFormats.ITF]
+        };
+    
         btnScan.onclick = () => {
             qrCodeScanner.start({ facingMode: "environment" }, config, qrCodeMessage => {
                 // This callback is called when a barcode is detected.
@@ -31,8 +32,7 @@
                 console.error(`Error scanning: ${err}`);
             });
         };
-
-        
     </script>
+    
 </body>
 </html>
