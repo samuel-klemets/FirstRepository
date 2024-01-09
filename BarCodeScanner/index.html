@@ -1,8 +1,55 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Barcode Scanner</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f3f3f3;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #reader {
+            margin: auto;
+            width: 100%;
+            max-width: 500px;
+        }
+        input[type="text"] {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        @media (max-width: 600px) {
+            button {
+                width: 100%;
+                margin: 10px 0;
+            }
+            input[type="text"] {
+                margin-top: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Barcode Scanner</h1>
@@ -10,9 +57,9 @@
     <button id="btn-scan">Scan ITF Barcode (8 digits only)</button>
     <button id="btn-scan-all">Scan Barcode (All Formats)</button>
     <button id="btn-scan-three">Scan Barcode (3 times in a row)</button>
-    <div style="width: 500px;" id="reader"></div>
+    <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
-    
+ 
     <script>
         const qrCodeScanner = new Html5Qrcode("reader");
         const btnScan = document.getElementById("btn-scan");
