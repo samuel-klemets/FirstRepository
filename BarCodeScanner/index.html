@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,14 +70,14 @@
         let scanCount = 0;
 
         const configAll = {
-            fps: 5,
+            fps: 2,
             qrbox: 250
         };
 
         const scanCallback = (qrCodeMessage) => {
             if (qrCodeMessage === lastScannedCode) {
                 scanCount++;
-                if (scanCount === 3) {
+                if (scanCount === 5) {
                     barcodeValue.value = qrCodeMessage;
                     qrCodeScanner.stop();
                     lastScannedCode = "";
