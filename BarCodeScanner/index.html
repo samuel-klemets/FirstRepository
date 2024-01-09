@@ -7,7 +7,7 @@
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">Scan Barcode&ITF&8char</button>
+    <button id="btn-scan">Scan Barcode ITF & 8 chars</button>
     <div style="width: 500px;" id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
     
@@ -19,7 +19,7 @@
         const config = {
             fps: 5,
             qrbox: 250,
-            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.ITF]
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.ITF]
         };
     
         btnScan.onclick = () => {
@@ -27,12 +27,9 @@
                 // Check if qrCodeMessage is exactly 8 characters long and contains only numbers.
                 if (qrCodeMessage.length === 8 && /^\d+$/.test(qrCodeMessage)) {
                     barcodeValue.value = qrCodeMessage;
-                } else {
-                    // Handle the invalid input, e.g., clear the field or show an error.
-                    barcodeValue.value = '';
-                    alert('Invalid barcode. Please scan a barcode with exactly 8 numbers.');
+                    qrCodeScanner.stop();
                 }
-                qrCodeScanner.stop();
+                // If not 8 characters, continue scanning without error message.
             }).catch(err => {
                 console.error(`Error scanning: ${err}`);
             });
