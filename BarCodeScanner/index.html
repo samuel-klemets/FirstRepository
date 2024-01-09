@@ -55,7 +55,7 @@
     <p>Click the button to start scanning:</p>
     <button id="btn-scan">Scan ITF Barcode (8 digits only)</button>
     <button id="btn-scan-all">Scan Barcode (All Formats)</button>
-    <button id="btn-scan-three">Scan Barcode (3 times in a row)</button>
+    <button id="btn-scan-three">Scan Barcode (10 times in a row)</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
  
@@ -70,14 +70,14 @@
         let scanCount = 0;
 
         const configAll = {
-            fps: 2,
+            fps: 10,
             qrbox: 250
         };
 
         const scanCallback = (qrCodeMessage) => {
             if (qrCodeMessage === lastScannedCode) {
                 scanCount++;
-                if (scanCount === 5) {
+                if (scanCount === 10) {
                     barcodeValue.value = qrCodeMessage;
                     qrCodeScanner.stop();
                     lastScannedCode = "";
