@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Barcode Scanner</title>
-    <!--script src="https://unpkg.com/html5-qrcode"></script-->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -25,8 +24,14 @@
     
         btnScan.onclick = () => {
             qrCodeScanner.start({ facingMode: "environment" }, config, qrCodeMessage => {
-                // This callback is called when a barcode is detected.
-                barcodeValue.value = qrCodeMessage;
+                // Check if qrCodeMessage is exactly 8 characters long and contains only numbers.
+                if (qrCodeMessage.length === 8 && /^\d+$/.test(qrCodeMessage)) {
+                    barcodeValue.value = qrCodeMessage;
+                } else {
+                    // Handle the invalid input, e.g., clear the field or show an error.
+                    barcodeValue.value = '';
+                    alert('Invalid barcode. Please scan a barcode with exactly 8 numbers.');
+                }
                 qrCodeScanner.stop();
             }).catch(err => {
                 console.error(`Error scanning: ${err}`);
