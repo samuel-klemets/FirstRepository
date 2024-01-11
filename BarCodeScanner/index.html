@@ -58,7 +58,7 @@
     <button id="btn-scan-three">Scan Barcode (10 times in a row)</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
-    <button id="btn-toggle-flashlight">Toggle Flashlight</button>
+
 
     <script>
         const qrCodeScanner = new Html5QrcodeScanner("reader", { showTorchButtonIfSupported: true });
@@ -116,11 +116,6 @@
             });
         };
 
-        const btnToggleFlashlight = document.getElementById("btn-toggle-flashlight");
-
-        btnToggleFlashlight.onclick = () => {
-            qrCodeScanner.toggleTorch(); // Toggle the flashlight
-        };
     </script>
 </body>
 </html>
