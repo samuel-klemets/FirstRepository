@@ -60,7 +60,7 @@
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
  
     <script>
-        const qrCodeScanner = new Html5Qrcode("reader");
+        const qrCodeScanner = new Html5Qrcode("reader",{ showTorchButtonIfSupported: true });
         const btnScan = document.getElementById("btn-scan");
         const btnScanAll = document.getElementById("btn-scan-all");
         const btnScanThree = document.getElementById("btn-scan-three");
