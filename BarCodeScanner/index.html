@@ -60,7 +60,26 @@
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
  
     <script>
-        const qrCodeScanner = new Html5Qrcode("reader");
+        // Add this line before creating the qrCodeScanner object
+        const torchWorker = new Worker("https://cdn.rawgit.com/sitepoint-editors/jsqrcode/v0.6.0/src/qrworker.js");
+
+        // Create the qrCodeScanner object with the torchWorker option
+        const qrCodeScanner = new Html5Qrcode("reader", { torchWorker });
+
+        // ...
+
+        // Function to toggle the flashlight
+        function toggleFlashlight() {
+            qrCodeScanner.toggleFlash();
+        }
+
+        // Add a button to toggle the flashlight
+        const btnToggleFlashlight = document.createElement("button");
+        btnToggleFlashlight.innerText = "Toggle Flashlight";
+        btnToggleFlashlight.onclick = toggleFlashlight;
+        document.body.appendChild(btnToggleFlashlight);
+
+        //const qrCodeScanner = new Html5Qrcode("reader");
         const btnScan = document.getElementById("btn-scan");
         const btnScanAll = document.getElementById("btn-scan-all");
         const btnScanThree = document.getElementById("btn-scan-three");
