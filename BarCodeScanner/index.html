@@ -54,12 +54,12 @@
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">Scan Barcode 30 fps</button>
+    <button id="btn-scan">Scan Barcode 15 fps</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
 
     <script>
-        const qrCodeScanner = new Html5QrcodeScanner("reader", { fps: 30, qrbox: 250, showTorchButtonIfSupported: true });
+        const qrCodeScanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250, showTorchButtonIfSupported: true });
         const btnScan = document.getElementById("btn-scan");
         const barcodeValue = document.getElementById("barcodeValue");
 
@@ -74,7 +74,7 @@
                 consecutiveScans = 1;
             }
 
-            if (consecutiveScans === 20) {
+            if (consecutiveScans === 7) {
                 barcodeValue.value = decodedText;
                 qrCodeScanner.clear(); // Stop scanning
             }
