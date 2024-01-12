@@ -53,14 +53,14 @@
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">d Scan ITF Barcode (8 digits only)</button>
+    <button id="btn-scan">e Scan ITF Barcode (8 digits only)</button>
     <button id="btn-scan-all">Scan Barcode (All Formats)</button>
     <button id="btn-scan-three">Scan Barcode (3 times in a row)</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
  
     <script>
-        const qrCodeScanner = new Html5QrcodeScanner("reader",{ showTorchButtonIfSupported: true });
+        const qrCodeScanner = new Html5QrcodeScanner("reader", { showTorchButtonIfSupported: true });
         const btnScan = document.getElementById("btn-scan");
         const btnScanAll = document.getElementById("btn-scan-all");
         const btnScanThree = document.getElementById("btn-scan-three");
