@@ -50,6 +50,7 @@
         }
     </style>
 </head>
+</head>
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
@@ -84,7 +85,9 @@
         };
 
         btnScan.onclick = () => {
-            qrCodeScanner.render(onScanSuccess, onScanFailure);
+            qrCodeScanner.render(onScanSuccess, onScanFailure).catch(err => {
+                console.error(`Error initializing scanner: ${err}`);
+            });
         };
     </script>
 </body>
