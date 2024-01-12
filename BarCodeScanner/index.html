@@ -58,46 +58,34 @@
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
 
     <script>
-        const qrCodeScanner = new Html5QrcodeScanner("reader", { showTorchButtonIfSupported: true });
+        const qrCodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, showTorchButtonIfSupported: true });
         const btnScan = document.getElementById("btn-scan");
         const barcodeValue = document.getElementById("barcodeValue");
 
         let lastScannedCode = null;
         let consecutiveScans = 0;
 
-        const config = {
-            fps: 10,
-            qrbox: 250
+        const onScanSuccess = (decodedText, decodedResult) => {
+            if (lastScannedCode === decodedText) {
+                consecutiveScans++;
+            } else {
+                lastScannedCode = decodedText;
+                consecutiveScans = 1;
+            }
+
+            if (consecutiveScans === 10) {
+                barcodeValue.value = decodedText;
+                qrCodeScanner.clear(); // Stop scanning
+            }
         };
 
-        qrCodeScanner.render(
-            { facingMode: "environment" },
-            config,
-            (decodedText, decodedResult) => {
-                // Check if scanned barcode matches the last scanned barcode
-                if (lastScannedCode === decodedText) {
-                    consecutiveScans++;
-                } else {
-                    lastScannedCode = decodedText;
-                    consecutiveScans = 1;
-                }
+        const onScanFailure = (errorMessage) => {
+            consecutiveScans = 0; // reset the counter on failure
+        };
 
-                // Update input box if scanned 10 times successfully
-                if (consecutiveScans === 10) {
-                    barcodeValue.value = decodedText;
-                }
-            },
-            (errorMessage) => {
-                // handle scan failure, reset consecutiveScans
-                consecutiveScans = 0;
-            }
-        ).catch(err => {
-            console.error(`Error scanning: ${err}`);
-        });
-
-        qrCodeScanner.show().catch(err => {
-            console.error(`Error showing scanner: ${err}`);
-        });
+        btnScan.onclick = () => {
+            qrCodeScanner.render(onScanSuccess, onScanFailure);
+        };
     </script>
 </body>
 </html>
