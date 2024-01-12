@@ -53,67 +53,40 @@
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">e Scan ITF Barcode (8 digits only)</button>
+    <button id="btn-scan">f Scan ITF Barcode (8 digits only)</button>
     <button id="btn-scan-all">Scan Barcode (All Formats)</button>
-    <button id="btn-scan-three">Scan Barcode (3 times in a row)</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
- 
+
     <script>
         const qrCodeScanner = new Html5QrcodeScanner("reader", { showTorchButtonIfSupported: true });
         const btnScan = document.getElementById("btn-scan");
         const btnScanAll = document.getElementById("btn-scan-all");
-        const btnScanThree = document.getElementById("btn-scan-three");
         const barcodeValue = document.getElementById("barcodeValue");
 
-        let lastScannedCode = "";
-        let scanCount = 0;
-
         const configAll = {
-            fps: 20,
+            fps: 10,
             qrbox: 250
         };
 
-        const scanCallback = (qrCodeMessage) => {
-            if (qrCodeMessage === lastScannedCode) {
-                scanCount++;
-                if (scanCount === 20) {
-                    barcodeValue.value = qrCodeMessage;
-                    qrCodeScanner.stop();
-                    lastScannedCode = "";
-                    scanCount = 0;
-                }
-            } else {
-                lastScannedCode = qrCodeMessage;
-                scanCount = 1;
-            }
-        };
-
         btnScan.onclick = () => {
-            qrCodeScanner.start({ facingMode: "environment" }, { ...configAll, formatsToSupport: [Html5QrcodeSupportedFormats.ITF] }, qrCodeMessage => {
-                if (qrCodeMessage.length === 8 && /^\d+$/.test(qrCodeMessage)) {
-                    barcodeValue.value = qrCodeMessage;
-                    qrCodeScanner.stop();
-                }
-            }).catch(err => {
+            qrCodeScanner.render(
+                { facingMode: "environment" },
+                { ...configAll, formatsToSupport: [Html5QrcodeSupportedFormats.ITF] }
+            ).catch(err => {
                 console.error(`Error scanning: ${err}`);
             });
         };
 
         btnScanAll.onclick = () => {
-            qrCodeScanner.start({ facingMode: "environment" }, configAll, qrCodeMessage => {
-                barcodeValue.value = qrCodeMessage;
-                qrCodeScanner.stop();
-            }).catch(err => {
+            qrCodeScanner.render({ facingMode: "environment" }, configAll).catch(err => {
                 console.error(`Error scanning: ${err}`);
             });
         };
 
-        btnScanThree.onclick = () => {
-            qrCodeScanner.start({ facingMode: "environment" }, configAll, scanCallback).catch(err => {
-                console.error(`Error scanning: ${err}`);
-            });
-        };
+        qrCodeScanner.show().catch(err => {
+            console.error(`Error showing scanner: ${err}`);
+        });
     </script>
 </body>
 </html>
