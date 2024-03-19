@@ -1,37 +1,97 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Barcode Scanner with ZXing</title>
-<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+    <title>Barcode Scanner with ZXing</title>
+    <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        video {
+            border: 4px solid #666;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        button, select {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #008cba;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover, select:hover {
+            background-color: #005f73;
+        }
+
+        p {
+            color: #333;
+        }
+    </style>
 </head>
+
 <body>
- 
-<h1>Barcode Scanner</h1>
-<video id="video" width="300" height="200" style="border: 1px solid black"></video>
-<button id="startButton">Start Scanning</button>
-<p>Scanned Code: <span id="result"></span></p>
- 
-<script>
-    let selectedDeviceId;
-    const codeReader = new ZXing.BrowserBarcodeReader()
-    console.log('ZXing code reader initialized')
-    codeReader.listVideoInputDevices()
-        .then((videoInputDevices) => {
-            selectedDeviceId = videoInputDevices[0].deviceId
-            document.getElementById('startButton').addEventListener('click', () => {
-                codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
-                    document.getElementById('result').textContent = result.text
-                }).catch((err) => {
-                    console.error(err)
-                    document.getElementById('result').textContent = err
-                })
-                console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
+
+    <h1>Barcode Scanner</h1>
+    <select id="videoInputSelect"></select>
+    <video id="video" width="400" height="300"></video>
+    <button id="startButton">Start Scanning</button>
+    <p>Scanned Code: <span id="result"></span></p>
+
+    <script>
+        let selectedDeviceId;
+        const codeReader = new ZXing.BrowserBarcodeReader();
+        console.log('ZXing code reader initialized');
+
+        codeReader.listVideoInputDevices()
+            .then((videoInputDevices) => {
+                const videoInputSelect = document.getElementById('videoInputSelect');
+                videoInputDevices.forEach((device) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${videoInputSelect.length + 1}`;
+                    videoInputSelect.appendChild(option);
+                });
+
+                videoInputSelect.onchange = () => {
+                    selectedDeviceId = videoInputSelect.value;
+                };
+
+                if (videoInputDevices.length >= 1) {
+                    selectedDeviceId = videoInputSelect.value;
+                }
+
+                document.getElementById('startButton').addEventListener('click', () => {
+                    codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
+                        document.getElementById('result').textContent = result.text;
+                    }).catch((err) => {
+                        console.error(err);
+                        document.getElementById('result').textContent = err;
+                    });
+                    console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
+                });
+
             })
-        })
-        .catch((err) => {
-            console.error(err)
-        })
-</script>
- 
+            .catch((err) => {
+                console.error(err);
+            });
+    </script>
+
 </body>
+
 </html>
