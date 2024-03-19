@@ -53,7 +53,7 @@
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">Scan Barcode 15 fps (2 times in a row) with checksum</button>
+    <button id="btn-scan">Scan Barcode 15 fps (2 times in a row) with checksum+</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
 
@@ -79,26 +79,26 @@
         }
 
         const onScanSuccess = (decodedText, decodedResult) => {
-            // Check if the scanned barcode is valid and matches the last scanned code
-            if (isValidITFBarcode(decodedText)) {
-                if (lastScannedCode === decodedText) {
-                    consecutiveScans++;
-                    // Update the barcode value only if it has been scanned a certain number of times consecutively
-                    if (consecutiveScans === 2) {
-                        barcodeValue.value = decodedText; // Display the valid scanned barcode
+            // Check if the current scan matches the last scanned code
+            if (lastScannedCode === decodedText) {
+                consecutiveScans++;
+                // Check if this is the 7th consecutive scan
+                if (consecutiveScans === 7) {
+                    // Validate ITF barcode format before displaying it
+                    if (isValidITFBarcode(decodedText)) {
+                        barcodeValue.value = decodedText; // Update the input field with the scanned barcode
                         qrCodeScanner.clear(); // Stop scanning
-                        lastScannedCode = null; // Reset for the next scan session
-                        consecutiveScans = 0;
+                    } else {
+                        console.error("Invalid ITF barcode detected.");
+                        consecutiveScans = 0; // Reset the counter if invalid
                     }
-                } else {
-                    lastScannedCode = decodedText;
-                    consecutiveScans = 1;
                 }
             } else {
-                console.error("Invalid ITF barcode detected.");
-                consecutiveScans = 0; // Reset the counter on failure
+                lastScannedCode = decodedText; // Update lastScannedCode with the new code
+                consecutiveScans = 1; // Reset consecutiveScans for a new code
             }
-        };
+};
+
 
         const onScanFailure = (errorMessage) => {
             console.error(`Scanning failed: ${errorMessage}`);
