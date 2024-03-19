@@ -50,11 +50,10 @@
         }
     </style>
 </head>
-</head>
 <body>
     <h1>Barcode Scanner</h1>
     <p>Click the button to start scanning:</p>
-    <button id="btn-scan">Scan Barcode 15 fps</button>
+    <button id="btn-scan">Scan Barcode 15 fps checksum</button>
     <div id="reader"></div>
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
 
@@ -66,17 +65,36 @@
         let lastScannedCode = null;
         let consecutiveScans = 0;
 
-        const onScanSuccess = (decodedText, decodedResult) => {
-            if (lastScannedCode === decodedText) {
-                consecutiveScans++;
-            } else {
-                lastScannedCode = decodedText;
-                consecutiveScans = 1;
+        function isValidITFBarcode(barcode) {
+            const digits = barcode.split('').map(Number);
+            let sum = 0;
+
+            for (let i = digits.length - 2; i >= 0; i--) {
+                sum += digits[i] * (i % 2 === 0 ? 3 : 1);
             }
 
-            if (consecutiveScans === 7) {
-                barcodeValue.value = decodedText;
-                qrCodeScanner.clear(); // Stop scanning
+            const checkDigitCalculated = (10 - (sum % 10)) % 10;
+            const checkDigitBarcode = digits[digits.length - 1];
+
+            return checkDigitCalculated === checkDigitBarcode;
+        }
+
+        const onScanSuccess = (decodedText, decodedResult) => {
+            if (isValidITFBarcode(decodedText)) {
+                if (lastScannedCode === decodedText) {
+                    consecutiveScans++;
+                } else {
+                    lastScannedCode = decodedText;
+                    consecutiveScans = 1;
+                }
+
+                if (consecutiveScans === 7) {
+                    barcodeValue.value = decodedText;
+                    qrCodeScanner.clear(); // Stop scanning
+                }
+            } else {
+                console.error("Invalid ITF barcode detected.");
+                consecutiveScans = 0; // reset the counter on failure
             }
         };
 
