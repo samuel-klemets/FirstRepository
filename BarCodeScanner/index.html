@@ -1,92 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barcode Scanner</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<style>
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; }
-  #reader { width: 100%; max-width: 600px; margin: 20px auto; }
-  .center { text-align: center; margin-top: 20px; }
-  button {
-    background-color: #4CAF50; /* Green */
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 50%;
-  }
-  button:hover {
-    opacity: 0.8;
-  }
-  input[type="text"] {
-    width: 60%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-</style>
+<title>Barcode Scanner with ZXing</title>
+<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
 </head>
 <body>
-
-<div class="center">
-  <button onclick="startScanning()">Start Scanning!</button>
-  <div id="reader"></div>
-  <input type="text" id="scannedNumber" placeholder="Scanned number">
-</div>
-
+ 
+<h1>Barcode Scanner</h1>
+<video id="video" width="300" height="200" style="border: 1px solid black"></video>
+<button id="startButton">Start Scanning</button>
+<p>Scanned Code: <span id="result"></span></p>
+ 
 <script>
-let html5QrCode;
-
-function onScanSuccess(decodedText, decodedResult) {
-  if (isValidITF(decodedText)) {
-    document.getElementById('scannedNumber').value = decodedText;
-    html5QrCode.stop().then(() => {
-      console.log("Scanning successfully stopped.");
-    }).catch(err => {
-      console.error("Failed to stop scanning.", err);
-    });
-  } else {
-    console.log("Invalid ITF, continuing scanning...");
-    // The scanner will continue scanning automatically.
-  }
-}
-
-function startScanning() {
-  if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader");
-  }
-
-  const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-  html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-    .catch(err => {
-      console.error("Failed to start scanning.", err);
-    });
-}
-
-function isValidITF(code) {
-  if (!/^\d{8}$/.test(code)) {
-    return false;
-  }
-
-  const digits = code.split('').map(num => parseInt(num, 10));
-  let sumOdd = 0, sumEven = 0;
-  for (let i = 0; i < 7; i++) {
-    if (i % 2 === 0) {
-      sumOdd += digits[i];
-    } else {
-      sumEven += digits[i];
-    }
-  }
-  const total = (sumOdd * 3) + sumEven;
-  const checksumDigit = (10 - (total % 10)) % 10;
-  return checksumDigit === digits[7];
-}
+    let selectedDeviceId;
+    const codeReader = new ZXing.BrowserBarcodeReader()
+    console.log('ZXing code reader initialized')
+    codeReader.listVideoInputDevices()
+        .then((videoInputDevices) => {
+            selectedDeviceId = videoInputDevices[0].deviceId
+            document.getElementById('startButton').addEventListener('click', () => {
+                codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
+                    document.getElementById('result').textContent = result.text
+                }).catch((err) => {
+                    console.error(err)
+                    document.getElementById('result').textContent = err
+                })
+                console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
+            })
+        })
+        .catch((err) => {
+            console.error(err)
+        })
 </script>
-
+ 
 </body>
 </html>
