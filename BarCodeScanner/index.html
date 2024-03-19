@@ -58,7 +58,11 @@
     <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
 
     <script>
-        const qrCodeScanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250, showTorchButtonIfSupported: true });
+        const qrCodeScanner = new Html5QrcodeScanner(
+    "reader", 
+    { fps: 15, qrbox: 250, showTorchButtonIfSupported: true }, 
+    /* verbose= */false);
+
         const btnScan = document.getElementById("btn-scan");
         const barcodeValue = document.getElementById("barcodeValue");
 
@@ -82,8 +86,8 @@
             // Check if the current scan matches the last scanned code
             if (lastScannedCode === decodedText) {
                 consecutiveScans++;
-                // Check if this is the 7th consecutive scan
-                if (consecutiveScans === 7) {
+                // Check if this is the 2nd consecutive scan
+                if (consecutiveScans === 2) {
                     // Validate ITF barcode format before displaying it
                     if (isValidITFBarcode(decodedText)) {
                         barcodeValue.value = decodedText; // Update the input field with the scanned barcode
@@ -106,10 +110,10 @@
         };
 
         btnScan.onclick = () => {
-            qrCodeScanner.render(onScanSuccess, onScanFailure).catch(err => {
-                console.error(`Error initializing scanner: ${err}`);
-            });
+            qrCodeScanner.render(onScanSuccess, onScanFailure);
+            // No .catch() after render() as it doesn't return a promise.
         };
+
     </script>
 </body>
 </html>
