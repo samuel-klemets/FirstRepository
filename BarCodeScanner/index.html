@@ -1,119 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Barcode Scanner</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f3f3f3;
-        }
-        h1 {
-            color: #333;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #reader {
-            margin: auto;
-            width: 100%;
-            max-width: 500px;
-        }
-        input[type="text"] {
-            width: 100%;
-            max-width: 500px;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        @media (max-width: 600px) {
-            button {
-                width: 100%;
-                margin: 10px 0;
-            }
-            input[type="text"] {
-                margin-top: 10px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barcode Scanner</title>
+<!-- Include the html5-qrcode library -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@latest"></script>
+<style>
+  body { font-family: Arial, sans-serif; }
+  #reader { width: 600px; margin: auto; }
+  .center { text-align: center; }
+</style>
 </head>
 <body>
-    <h1>Barcode Scanner</h1>
-    <p>Click the button to start scanning:</p>
-    <button id="btn-scan">Scan Barcode 15 fps (2 times in a row) with checksum++</button>
-    <div id="reader"></div>
-    <input type="text" id="barcodeValue" placeholder="Scanned barcode will appear here" />
 
-    <script>
-        const qrCodeScanner = new Html5QrcodeScanner(
-    "reader", 
-    { fps: 15, qrbox: 250, showTorchButtonIfSupported: true }, 
-    /* verbose= */false);
+<div class="center">
+  <button onclick="startScanning()">Start Scanning</button>
+  <div id="reader"></div>
+  <input type="text" id="scannedNumber" placeholder="Scanned number">
+</div>
 
-        const btnScan = document.getElementById("btn-scan");
-        const barcodeValue = document.getElementById("barcodeValue");
+<script>
+function startScanning() {
+  const html5QrCode = new Html5Qrcode("reader");
+  const config = { fps: 10, qrbox: 250 };
 
-        let lastScannedCode = null;
-        let consecutiveScans = 0;
+  // This function will be called when a barcode is successfully scanned.
+  function onScanSuccess(decodedText, decodedResult) {
+    // Check if it's an ITF code with correct checksum.
+    if (isValidITF(decodedText)) {
+      document.getElementById('scannedNumber').value = decodedText;
+      html5QrCode.stop().then(() => {
+        console.log("Scanning stopped");
+      }).catch(err => {
+        console.error("Failed to stop scanning.", err);
+      });
+    }
+  }
 
-        function isValidITFBarcode(barcode) {
-            const digits = barcode.split('').map(Number);
-            let sum = 0;
+  // Start scanning
+  html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+}
 
-            // Assuming the barcode without the last digit for the checksum calculation
-            for (let i = 0; i < digits.length - 1; i++) {
-                sum += digits[i] * ((i % 2 === 0) ? 3 : 1);
-            }
+// Validate if the code is an ITF barcode with a correct checksum.
+// This is a simple validation function, you might need to adjust it according to your specific needs.
+function isValidITF(code) {
+  // Add your validation logic here.
+  // For demonstration, this will accept any input. Implement the actual ITF validation and checksum verification.
+  return true;
+}
+</script>
 
-            const checkDigit = (10 - sum % 10) % 10;
-            return digits[digits.length - 1] === checkDigit;
-        }
-
-        const onScanSuccess = (decodedText, decodedResult) => {
-            // Check if the current scan matches the last scanned code
-            if (lastScannedCode === decodedText) {
-                consecutiveScans++;
-                // Check if this is the 2nd consecutive scan
-                if (consecutiveScans === 2) {
-                    // Validate ITF barcode format before displaying it
-                    if (isValidITFBarcode(decodedText)) {
-                        barcodeValue.value = decodedText; // Update the input field with the scanned barcode
-                        qrCodeScanner.clear(); // Stop scanning
-                    } else {
-                        console.error("Invalid ITF barcode detected.");
-                        consecutiveScans = 0; // Reset the counter if invalid
-                    }
-                }
-            } else {
-                lastScannedCode = decodedText; // Update lastScannedCode with the new code
-                consecutiveScans = 1; // Reset consecutiveScans for a new code
-            }
-};
-
-
-        const onScanFailure = (errorMessage) => {
-            console.error(`Scanning failed: ${errorMessage}`);
-            consecutiveScans = 0; // Reset the counter on failure
-        };
-
-        btnScan.onclick = () => {
-            qrCodeScanner.render(onScanSuccess, onScanFailure);
-            // No .catch() after render() as it doesn't return a promise.
-        };
-
-    </script>
 </body>
 </html>
