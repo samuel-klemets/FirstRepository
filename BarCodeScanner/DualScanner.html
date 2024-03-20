@@ -81,7 +81,92 @@
         </tr>
     </table>
 
-    <!-- Your script will go here -->
-    
+    <script>
+        // Common Variables
+        let scanCounts = new Map();
+
+        // ZXing Specific Code
+        let selectedDeviceId;
+        const codeReader = new ZXing.BrowserBarcodeReader();
+        let track = null;
+
+        // Html5Qrcode Specific Code
+        const qrCodeScanner = new Html5Qrcode("reader");
+
+        async function populateVideoInputDevices() {
+            const devices = await codeReader.listVideoInputDevices();
+            const videoSelect = document.getElementById("videoInputSelect");
+            videoSelect.innerHTML = devices.map(device => `<option value="${device.deviceId}">${device.label}</option>`).join('');
+            selectedDeviceId = devices[0]?.deviceId;
+        }
+
+        document.getElementById("videoInputSelect").addEventListener("change", (event) => {
+            selectedDeviceId = event.target.value;
+        });
+
+        document.getElementById("startZXing").addEventListener("click", () => {
+            codeReader.decodeFromVideoDevice(selectedDeviceId, "video", (result, err) => {
+                if (result) {
+                    updateTable(result.text);
+                    if (track === null) { // Only set the track if it's not already set
+                        track = codeReader.stream.getVideoTracks()[0];
+                    }
+                }
+            }).catch(err => console.error(err));
+        });
+
+        document.getElementById("toggleFlashlight").addEventListener("click", () => {
+            if (track) {
+                const capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    const torchOn = !track.getSettings().torch;
+                    track.applyConstraints({ advanced: [{ torch: torchOn }] });
+                }
+            }
+        });
+
+        document.getElementById("startHtml5Qrcode").addEventListener("click", () => {
+            qrCodeScanner.start({ facingMode: "environment" }, {
+                fps: 10,
+                qrbox: 250
+            }, (decodedText) => {
+                updateTable(decodedText);
+            }).catch(err => {
+                console.error(err);
+            });
+        });
+
+        document.getElementById('scannerSelect').addEventListener('change', function() {
+            switchScanner(this.value);
+        });
+
+        function switchScanner(scanner) {
+            if (scanner === 'zxing') {
+                document.getElementById('zxingControls').style.display = 'block';
+                document.getElementById('html5QrcodeScanner').style.display = 'none';
+                qrCodeScanner.stop().catch(err => console.error(err)); // Stop Html5Qrcode Scanner if running
+                populateVideoInputDevices();
+            } else if (scanner === 'html5qrcode') {
+                document.getElementById('zxingControls').style.display = 'none';
+                document.getElementById('html5QrcodeScanner').style.display = 'block';
+                codeReader.reset();
+            }
+        }
+
+        function updateTable(code) {
+            scanCounts.set(code, (scanCounts.get(code) || 0) + 1);
+            const table = document.getElementById('codesTable');
+            table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>'; // Reset table headers
+            scanCounts.forEach((count, code) => {
+                const row = table.insertRow(-1);
+                const cellCode = row.insertCell(0);
+                const cellCount = row.insertCell(1);
+                cellCode.textContent = code;
+                cellCount.textContent = count;
+            });
+        }
+
+        populateVideoInputDevices(); // Call this function to populate on page load
+    </script>
 </body>
 </html>
