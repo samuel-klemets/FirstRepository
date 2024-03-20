@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Barcode Scanner with ZXing and Flashlight Toggle</title>
+    <title>Barcode Scanner with ZXing</title>
     <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
     <style>
         body {
@@ -45,12 +45,11 @@
     </style>
 </head>
 <body>
-
     <h1>Barcode Scanner</h1>
     <select id="videoInputSelect"></select>
+    <button id="toggleFlash">Toggle Flashlight</button>
     <video id="video" width="400" height="300"></video>
     <button id="startButton">Start Scanning</button>
-    <button id="toggleFlashlight">Toggle Flashlight</button>
     <h2>Scanned Codes</h2>
     <table id="codesTable">
         <tr>
@@ -61,54 +60,100 @@
 
     <script>
         let selectedDeviceId;
+        let stream = null; // To hold the current stream
         const codeReader = new ZXing.BrowserBarcodeReader();
         const scanCounts = new Map(); // Initialize a Map to track scan counts
-        let flashlightEnabled = false; // Track the flashlight state
-        let videoStream = null; // To store the stream for flashlight control
 
         console.log('ZXing code reader initialized');
 
-        // Function to update the table
-        const updateTable = () => { /* unchanged, see previous script */ };
+        const updateTable = () => {
+            const table = document.getElementById('codesTable');
+            table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>';
+            scanCounts.forEach((count, code) => {
+                const row = table.insertRow(-1);
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.textContent = code;
+                cell2.textContent = count;
+            });
+        };
 
-        // Function to toggle the flashlight
-        const toggleFlashlight = async () => {
-            if (!videoStream) return; // Do nothing if videoStream is not available
-
-            const track = videoStream.getVideoTracks()[0]; // Get the first video track
-            flashlightEnabled = !flashlightEnabled; // Toggle the state
-
-            if (flashlightEnabled) {
-                await track.applyConstraints({ advanced: [{torch: true}] });
-            } else {
-                await track.applyConstraints({ advanced: [{torch: false}] });
+        const toggleFlashlight = () => {
+            if (stream && stream.getVideoTracks()[0]) {
+                const track = stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities();
+                // Check if flashlight capability is available
+                if (capabilities.torch) {
+                    const settings = track.getSettings();
+                    if (settings.torch) {
+                        track.applyConstraints({
+                            advanced: [{torch: false}]
+                        });
+                    } else {
+                        track.applyConstraints({
+                            advanced: [{torch: true}]
+                        });
+                    }
+                } else {
+                    alert("Flashlight not available on this device/camera");
+                }
             }
         };
 
-        // Device selection and scanner initialization remain unchanged
         codeReader.listVideoInputDevices()
-            .then((videoInputDevices) => { /* unchanged, see previous script */ })
-            .catch((err) => { console.error(err); });
+            .then((videoInputDevices) => {
+                const videoInputSelect = document.getElementById('videoInputSelect');
+                videoInputSelect.innerHTML = ''; // Clear existing options
+                videoInputDevices.forEach((device) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${videoInputSelect.length + 1}`;
+                    videoInputSelect.appendChild(option);
+                });
 
-        document.getElementById('startButton').addEventListener('click', () => { 
+                selectedDeviceId = videoInputSelect.value; // Automatically select the first camera
+
+                videoInputSelect.onchange = () => {
+                    selectedDeviceId = videoInputSelect.value;
+                    if (stream) { // If there's a stream running, stop it before changing the camera
+                        stream.getTracks().forEach(track => {
+                            track.stop();
+                        });
+                        // Restart scanning with the new camera
+                        startScanning();
+                    }
+                };
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            startScanning();
+        });
+
+        document.getElementById('toggleFlash').addEventListener('click', () => {
+            toggleFlashlight();
+        });
+
+        function startScanning() {
             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-                // Unchanged scan result handling
                 if (result) {
-                    // Unchanged scan result processing
+                    console.log(`Scanned code: ${result.text}`);
+                    const currentCount = scanCounts.get(result.text) || 0;
+                    scanCounts.set(result.text, currentCount + 1);
+                    updateTable();
                 }
                 if (err && !(err instanceof ZXing.NotFoundException)) {
                     console.error(err);
                 }
-            }).then(stream => {
-                // Save the stream for later to control the flashlight
-                videoStream = stream;
+            }).then((videoStream) => {
+                stream = videoStream; // Keep the stream to toggle the flashlight later
+            }).catch((err) => {
+                console.error(err);
             });
-            console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
-        });
-
-        // Add event listener for the flashlight toggle button
-        document.getElementById('toggleFlashlight').addEventListener('click', toggleFlashlight);
+        }
     </script>
-
 </body>
 </html>
+
