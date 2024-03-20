@@ -55,8 +55,8 @@
 <body>
     <h1>Combined Barcode Scanners</h1>
     <select id="scannerSelect">
-        <option value="Zxing">ZXing Scanner</option>
-        <option value="Html5qrcode">Html5QrCode Scanner</option>
+        <option value="zxing">ZXing Scanner</option>
+        <option value="html5qrcode">Html5QrCode Scanner</option>
     </select>
     <div id="zxingControls">
         <select id="videoInputSelect"></select>
@@ -86,8 +86,50 @@
 
         // Html5Qrcode Specific Code
         const qrCodeScanner = new Html5Qrcode("reader");
-        
-        // Switch Scanner
+
+        async function populateVideoInputDevices() {
+            const devices = await codeReader.listVideoInputDevices();
+            const videoSelect = document.getElementById("videoInputSelect");
+            videoSelect.innerHTML = devices.map(device => `<option value="${device.deviceId}">${device.label}</option>`).join('');
+            selectedDeviceId = devices[0]?.deviceId;
+        }
+
+        document.getElementById("videoInputSelect").addEventListener("change", (event) => {
+            selectedDeviceId = event.target.value;
+        });
+
+        document.getElementById("startZXing").addEventListener("click", () => {
+            codeReader.decodeFromVideoDevice(selectedDeviceId, "video", (result, err) => {
+                if (result) {
+                    updateTable(result.text);
+                    if (track === null) { // Only set the track if it's not already set
+                        track = codeReader.stream.getVideoTracks()[0];
+                    }
+                }
+            }).catch(err => console.error(err));
+        });
+
+        document.getElementById("toggleFlashlight").addEventListener("click", () => {
+            if (track) {
+                const capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    const torchOn = !track.getSettings().torch;
+                    track.applyConstraints({ advanced: [{ torch: torchOn }] });
+                }
+            }
+        });
+
+        document.getElementById("startHtml5Qrcode").addEventListener("click", () => {
+            qrCodeScanner.start({ facingMode: "environment" }, {
+                fps: 10,
+                qrbox: 250
+            }, (decodedText) => {
+                updateTable(decodedText);
+            }).catch(err => {
+                console.error(err);
+            });
+        });
+
         document.getElementById('scannerSelect').addEventListener('change', function() {
             switchScanner(this.value);
         });
@@ -96,21 +138,16 @@
             if (scanner === 'zxing') {
                 document.getElementById('zxingControls').style.display = 'block';
                 document.getElementById('html5QrcodeScanner').style.display = 'none';
-                qrCodeScanner.stop(); // Stop Html5Qrcode Scanner if running
+                qrCodeScanner.stop().catch(err => console.error(err)); // Stop Html5Qrcode Scanner if running
+                populateVideoInputDevices();
             } else if (scanner === 'html5qrcode') {
                 document.getElementById('zxingControls').style.display = 'none';
                 document.getElementById('html5QrcodeScanner').style.display = 'block';
-                // Assuming ZXing scanner stops when changing devices or losing focus
+                codeReader.reset();
             }
         }
 
-        // Add your existing code for each scanner here, with necessary modifications
-        // For example, integrate the ZXing scanner setup and Html5Qrcode scanner setup code
-        // Remember to update the `updateTable` function to reflect scans from both scanners
-
         function updateTable(code) {
-            // Update the common table for both scanners
-            // This might be called from both ZXing and Html5Qrcode event handlers
             scanCounts.set(code, (scanCounts.get(code) || 0) + 1);
             const table = document.getElementById('codesTable');
             table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>'; // Reset table headers
@@ -123,9 +160,7 @@
             });
         }
 
-        // ZXing event listeners and setup goes here
-        // Html5Qrcode setup and button click handler goes here
-
+        populateVideoInputDevices(); // Call this function to populate on page load
     </script>
 </body>
 </html>
