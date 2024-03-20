@@ -111,16 +111,23 @@
                 console.error(err);
             });
 
-        document.getElementById('toggleFlashlight').addEventListener('click', () => {
-            if (track && track.getCapabilities().torch) {
-                let torchOn = track.getSettings().torch;
-                track.applyConstraints({
-                    advanced: [{torch: !torchOn}]
-                }).catch(e => console.error('Error toggling the torch:', e));
-            } else {
-                alert('Flashlight function not available or notsupported on this device.');
-}
+            document.getElementById('toggleFlashlight').addEventListener('click', () => {
+    if (track) {
+        // Check if the track has the torch capability using getCapabilities()
+        const capabilities = track.getCapabilities();
+        if (capabilities.torch) {
+            let torchOn = track.getSettings().torch;
+            track.applyConstraints({
+                advanced: [{torch: !torchOn}]
+            }).then(() => {
+                console.log('Torch toggled to:', !torchOn);
+            }).catch(e => console.error('Error toggling the torch:', e));
+        } else {
+            alert('Flashlight function not available or not supported on this device.');
+        }
+    }
 });
+
 </script>
 
 </body>
