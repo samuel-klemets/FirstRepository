@@ -51,9 +51,41 @@
     <select id="videoInputSelect"></select>
     <video id="video" width="400" height="300"></video>
     <button id="startButton">Start Scanning</button>
+    <button id="toggleFlashlight">Toggle Flashlight</button>
     <p>Scanned Code: <span id="result"></span></p>
 
     <script>
+        let stream = null; // This will hold the stream
+        let track = null; // This will hold the track
+        let imageCapture = null; // This will hold the ImageCapture object
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: selectedDeviceId } } })
+                .then(gotStream)
+                .then(gotDevices)
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById('result').textContent = error;
+                });
+        });
+
+        function gotStream(mediaStream) {
+            stream = mediaStream; // Make the stream available to console
+            document.getElementById('video').srcObject = mediaStream;
+            track = mediaStream.getVideoTracks()[0];
+            imageCapture = new ImageCapture(track);
+        }
+
+        document.getElementById('toggleFlashlight').addEventListener('click', () => {
+            if (track && track.getCapabilities().torch) {
+                let torchOn = track.getSettings().torch;
+                track.applyConstraints({
+                    advanced: [{torch: !torchOn}]
+                }).catch(e => console.error(e));
+            }
+        });
+
+
         let selectedDeviceId;
         const codeReader = new ZXing.BrowserBarcodeReader();
         console.log('ZXing code reader initialized');
