@@ -77,40 +77,26 @@
         let scanCounts = new Map(); // Track scan counts
         let track = null; // This will hold the video track for flashlight control
         document.getElementById('startButton').addEventListener('click', function() {
-    // Explicitly request camera access
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    // Once permission is granted, proceed with setting up the video device for scanning
-                    stream.getTracks().forEach(track => track.stop()); // Stop the stream so ZXing can use it
-                    setupScanner();
-                }).catch(function(err) {
-                    console.error('Error accessing the camera:', err);
-                    alert('Error accessing the camera. Please ensure camera access is allowed.');
-                });
+            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+                if (result) {
+                    // Only proceed if the scanned code is exactly 8 characters long
+                    if (result.text.length === 8) {
+                        console.log(`Scanned code: ${result.text}`);
+                        // Increment the count for this code
+                        scanCounts.set(result.text, (scanCounts.get(result.text) || 0) + 1);
+                        updateTable(); // Update the table with the new scan counts
+                    }
+                } else if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error(err);
+                }
+            }).then(stream => {
+                if(stream) {
+                    track = stream.getVideoTracks()[0];
+                }
+            }).catch(err => {
+            console.error('Error starting barcode scan:', err);
             });
-
-            function setupScanner() {
-                codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-                    if (result) {
-                        // Only proceed if the scanned code is exactly 8 characters long
-                        if (result.text.length === 8) {
-                            console.log(`Scanned code: ${result.text}`);
-                            // Increment the count for this code
-                            scanCounts.set(result.text, (scanCounts.get(result.text) || 0) + 1);
-                            updateTable(); // Update the table with the new scan counts
-                        }
-                    } else if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error(err);
-                    }
-                }).then(stream => {
-                    if(stream) {
-                        track = stream.getVideoTracks()[0];
-                    }
-                }).catch(err => {
-                    console.error('Error starting barcode scan:', err);
-                });
-            }
-            ;
+        });
 
         function updateTable() {
             const table = document.getElementById('codesTable');
