@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined Barcode Scanners</title>
+    <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            padding-top: 20px;
+        }
+        video, table, #reader {
+            max-width: 90%;
+            border: 4px solid #666;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        button, select {
+            margin: 10px;
+            border-radius: 5px;
+            padding: 10px 20px;
+            background-color: #008cba;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover, select:hover {
+            background-color: #005f73;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        table {
+            width: auto;
+            border-collapse: collapse;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 600px) {
+            button, select {
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Combined Barcode Scanners</h1>
+    <select id="scannerSelect">
+        <option value="Zxing">ZXing Scanner</option>
+        <option value="Html5qrcode">Html5QrCode Scanner</option>
+    </select>
+    <div id="zxingControls">
+        <select id="videoInputSelect"></select>
+        <button id="toggleFlashlight">Toggle Flashlight</button>
+        <video id="video" style="width: 100%; max-width: 400px; height: auto;"></video>
+        <button id="startZXing">Start ZXing Scanning</button>
+    </div>
+    <div id="html5QrcodeScanner" style="display: none;">
+        <button id="startHtml5Qrcode">Start Html5QrCode Scanning</button>
+        <div id="reader"></div>
+    </div>
+    <table id="codesTable">
+        <tr>
+            <th>Scanned Codes</th>
+            <th>Scanned X Times</th>
+        </tr>
+    </table>
+
+    <script>
+        // Common Variables
+        let scanCounts = new Map();
+
+        // ZXing Specific Code
+        let selectedDeviceId;
+        const codeReader = new ZXing.BrowserBarcodeReader();
+        let track = null;
+
+        // Html5Qrcode Specific Code
+        const qrCodeScanner = new Html5Qrcode("reader");
+        
+        // Switch Scanner
+        document.getElementById('scannerSelect').addEventListener('change', function() {
+            switchScanner(this.value);
+        });
+
+        function switchScanner(scanner) {
+            if (scanner === 'zxing') {
+                document.getElementById('zxingControls').style.display = 'block';
+                document.getElementById('html5QrcodeScanner').style.display = 'none';
+                qrCodeScanner.stop(); // Stop Html5Qrcode Scanner if running
+            } else if (scanner === 'html5qrcode') {
+                document.getElementById('zxingControls').style.display = 'none';
+                document.getElementById('html5QrcodeScanner').style.display = 'block';
+                // Assuming ZXing scanner stops when changing devices or losing focus
+            }
+        }
+
+        // Add your existing code for each scanner here, with necessary modifications
+        // For example, integrate the ZXing scanner setup and Html5Qrcode scanner setup code
+        // Remember to update the `updateTable` function to reflect scans from both scanners
+
+        function updateTable(code) {
+            // Update the common table for both scanners
+            // This might be called from both ZXing and Html5Qrcode event handlers
+            scanCounts.set(code, (scanCounts.get(code) || 0) + 1);
+            const table = document.getElementById('codesTable');
+            table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>'; // Reset table headers
+            scanCounts.forEach((count, code) => {
+                const row = table.insertRow(-1);
+                const cellCode = row.insertCell(0);
+                const cellCount = row.insertCell(1);
+                cellCode.textContent = code;
+                cellCount.textContent = count;
+            });
+        }
+
+        // ZXing event listeners and setup goes here
+        // Html5Qrcode setup and button click handler goes here
+
+    </script>
+</body>
+</html>
