@@ -73,14 +73,14 @@
         let selectedDeviceId;
         const codeReader = new ZXing.BrowserBarcodeReader();
         const scanCounts = new Map(); // Initialize a Map to track scan counts
-
+    
         console.log('ZXing code reader initialized');
-
+    
         const updateTable = () => {
             const table = document.getElementById('codesTable');
             // Clear existing table rows except for the header
             table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>';
-
+    
             // Add new rows for each scanned code
             scanCounts.forEach((count, code) => {
                 const row = table.insertRow(-1);
@@ -90,7 +90,7 @@
                 cell2.textContent = count;
             });
         };
-
+    
         codeReader.listVideoInputDevices()
             .then((videoInputDevices) => {
                 const videoInputSelect = document.getElementById('videoInputSelect');
@@ -100,36 +100,36 @@
                     option.text = device.label || `Camera ${videoInputSelect.length + 1}`;
                     videoInputSelect.appendChild(option);
                 });
-
+    
+                if (videoInputDevices.length > 0) {
+                    selectedDeviceId = videoInputDevices[0].deviceId; // Automatically select the first camera if available
+                    videoInputSelect.value = selectedDeviceId;
+                }
+    
                 videoInputSelect.onchange = () => {
                     selectedDeviceId = videoInputSelect.value;
                 };
-
-                if (videoInputDevices.length >= 1) {
-                    selectedDeviceId = videoInputSelect.value;
-                }
-
-                document.getElementById('startButton').addEventListener('click', () => {
-                    codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-                        if (result) {
-                            document.getElementById('result').textContent = result.text;
-                            const currentCount = scanCounts.get(result.text) || 0;
-                            scanCounts.set(result.text, currentCount + 1);
-                            updateTable();
-                        }
-                        if (err && !(err instanceof ZXing.NotFoundException)) {
-                            console.error(err);
-                            document.getElementById('result').textContent = err;
-                        }
-                    });
-                    console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
-                });
-
             })
             .catch((err) => {
                 console.error(err);
             });
+    
+        document.getElementById('startButton').addEventListener('click', () => {
+            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+                if (result) {
+                    console.log(`Scanned code: ${result.text}`);
+                    const currentCount = scanCounts.get(result.text) || 0;
+                    scanCounts.set(result.text, currentCount + 1);
+                    updateTable();
+                }
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error(err);
+                }
+            });
+            console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
+        });
     </script>
+    
 
 </body>
 </html>
