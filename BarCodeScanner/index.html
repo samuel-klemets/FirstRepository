@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Barcode Scanner with ZXing and Flashlight Control</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner with Flashlight</title>
     <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
     <style>
         body {
@@ -10,47 +12,54 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            height: 100vh;
             margin: 0;
-        }
-        h1, h2 {
-            color: #333;
+            padding-top: 20px; /* Reduced padding */
         }
         video, table {
+            max-width: 90%; /* Make video responsive */
             border: 4px solid #666;
-            border-radius: 8px;
             margin-bottom: 20px;
+            border-radius: 8px;
         }
         button, select {
-            padding: 10px 20px;
             margin: 10px;
-            border: none;
             border-radius: 5px;
+            padding: 10px 20px;
             background-color: #008cba;
             color: white;
+            border: none;
             cursor: pointer;
         }
         button:hover, select:hover {
             background-color: #005f73;
         }
-        table {
-            border-collapse: collapse;
-            width: 50%;
-        }
         th, td {
-            text-align: left;
             padding: 8px;
+            text-align: left;
         }
-        tr:nth-child(even) {background-color: #f2f2f2;}
+        table {
+            width: auto;
+            border-collapse: collapse;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em; /* Smaller text on small screens */
+            }
+            button, select {
+                padding: 8px 15px; /* Smaller padding */
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Barcode Scanner</h1>
     <select id="videoInputSelect"></select>
     <button id="toggleFlashlight">Toggle Flashlight</button>
-    <video id="video" width="400" height="300"></video>
+    <video id="video" style="width: 100%; max-width: 400px; height: auto;"></video> <!-- Responsive video -->
     <button id="startButton">Start Scanning</button>
-    <h2>Scanned Codes</h2>
     <table id="codesTable">
         <tr>
             <th>Scanned Codes</th>
@@ -62,22 +71,9 @@
         let selectedDeviceId;
         const codeReader = new ZXing.BrowserBarcodeReader();
         let scanCounts = new Map(); // Track scan counts
-        let stream = null; // This will hold the stream
-        let track = null; // This will hold the track
+        let track = null; // This will hold the video track for flashlight control
 
-        function updateTable() {
-            const table = document.getElementById('codesTable');
-            table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>'; // Reset table headers
-            for (let [code, count] of scanCounts) {
-                let row = table.insertRow();
-                let cell1 = row.insertCell(0);
-                let cell2 = row.insertCell(1);
-                cell1.textContent = code;
-                cell2.textContent = count;
-            }
-        }
-
-        document.getElementById('startButton').addEventListener('click', () => {
+        document.getElementById('startButton').addEventListener('click', function() {
             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                 if (result) {
                     console.log(`Scanned code: ${result.text}`);
@@ -86,10 +82,27 @@
                 } else if (err && !(err instanceof ZXing.NotFoundException)) {
                     console.error(err);
                 }
-            }).then((mediaStream) => {
-                stream = mediaStream; // Keep the stream to be used for toggling the flashlight
-                track = stream.getVideoTracks()[0];
+            }).then(stream => {
+                if(stream) {
+                    track = stream.getVideoTracks()[0];
+                }
+            }).catch(err => {
+                console.error('Error starting barcode scan:', err);
             });
+        });
+
+        document.getElementById('toggleFlashlight').addEventListener('click', () => {
+            if (track) {
+                let capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    let torchOn = track.getSettings().torch;
+                    track.applyConstraints({
+                        advanced: [{torch: !torchOn}]
+                    }).catch(e => console.error('Error toggling the torch:', e));
+                } else {
+                    alert('Flashlight function not available or not supported on this device.');
+                }
+            }
         });
 
         codeReader.listVideoInputDevices()
@@ -105,30 +118,23 @@
                     selectedDeviceId = videoInputSelect.value;
                 };
                 if (videoInputDevices.length > 0) {
-                    selectedDeviceId = videoInputSelect.value; // Automatically select the first camera
+                    selectedDeviceId = videoInputSelect.options[videoInputSelect.selectedIndex].value;
                 }
             }).catch((err) => {
-                console.error(err);
+                console.error('Error listing video input devices:', err);
             });
 
-            document.getElementById('toggleFlashlight').addEventListener('click', () => {
-    if (track) {
-        // Check if the track has the torch capability using getCapabilities()
-        const capabilities = track.getCapabilities();
-        if (capabilities.torch) {
-            let torchOn = track.getSettings().torch;
-            track.applyConstraints({
-                advanced: [{torch: !torchOn}]
-            }).then(() => {
-                console.log('Torch toggled to:', !torchOn);
-            }).catch(e => console.error('Error toggling the torch:', e));
-        } else {
-            alert('Flashlight function not available or not supported on this device.');
+        function updateTable() {
+            const table = document.getElementById('codesTable');
+            table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>'; // Reset table headers
+            scanCounts.forEach((count, code) => {
+                const row = table.insertRow(-1);
+                const cellCode = row.insertCell(0);
+                const cellCount = row.insertCell(1);
+                cellCode.textContent = code;
+                cellCount.textContent = count;
+            });
         }
-    }
-});
-
-</script>
-
+    </script>
 </body>
 </html>
