@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Barcode Scanner with ZXing</title>
+    <title>Barcode Scanner with ZXing and Flashlight Control</title>
     <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
     <style>
         body {
@@ -61,76 +61,67 @@
     <script>
         let selectedDeviceId;
         const codeReader = new ZXing.BrowserBarcodeReader();
+        let scanCounts = new Map(); // Track scan counts
         let stream = null; // This will hold the stream
         let track = null; // This will hold the track
-        let imageCapture = null; // This will hold the ImageCapture object
+
+        function updateTable() {
+            const table = document.getElementById('codesTable');
+            table.innerHTML = '<tr><th>Scanned Codes</th><th>Scanned X Times</th></tr>'; // Reset table headers
+            for (let [code, count] of scanCounts) {
+                let row = table.insertRow();
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                cell1.textContent = code;
+                cell2.textContent = count;
+            }
+        }
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+                if (result) {
+                    console.log(`Scanned code: ${result.text}`);
+                    scanCounts.set(result.text, (scanCounts.get(result.text) || 0) + 1);
+                    updateTable();
+                } else if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error(err);
+                }
+            }).then((mediaStream) => {
+                stream = mediaStream; // Keep the stream to be used for toggling the flashlight
+                track = stream.getVideoTracks()[0];
+            });
+        });
 
         codeReader.listVideoInputDevices()
             .then((videoInputDevices) => {
                 const videoInputSelect = document.getElementById('videoInputSelect');
-                videoInputSelect.innerHTML = ''; // Clear existing options
-                videoInputDevices.forEach((device) => {
+                videoInputDevices.forEach((device, index) => {
                     const option = document.createElement('option');
                     option.value = device.deviceId;
-                    option.text = device.label || `Camera ${videoInputSelect.length + 1}`;
+                    option.text = device.label || `Camera ${index + 1}`;
                     videoInputSelect.appendChild(option);
                 });
-
-                selectedDeviceId = videoInputSelect.value; // Automatically select the first camera
-
                 videoInputSelect.onchange = () => {
                     selectedDeviceId = videoInputSelect.value;
-                    if (stream) {
-                        let tracks = stream.getTracks();
-                        tracks.forEach(track => track.stop());
-                    }
-                    startScanning(); // Restart scanning with the new selected device
                 };
-            })
-            .catch((err) => {
+                if (videoInputDevices.length > 0) {
+                    selectedDeviceId = videoInputSelect.value; // Automatically select the first camera
+                }
+            }).catch((err) => {
                 console.error(err);
             });
-
-        document.getElementById('startButton').addEventListener('click', startScanning);
-
-        function startScanning() {
-            navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: selectedDeviceId } } })
-                .then(gotStream)
-                .catch(error => {
-                    console.error(error);
-                    document.getElementById('result').textContent = error;
-                });
-
-            codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-                if (result) {
-                    console.log(`Scanned code: ${result.text}`);
-                    // Update your scanned codes table here as before
-                } else if (err && !(err instanceof ZXing.NotFoundException)) {
-                    console.error(err);
-                }
-            });
-        }
-
-        function gotStream(mediaStream) {
-            stream = mediaStream;
-            document.getElementById('video').srcObject = mediaStream;
-            track = mediaStream.getVideoTracks()[0];
-            imageCapture = new ImageCapture(track);
-        }
 
         document.getElementById('toggleFlashlight').addEventListener('click', () => {
             if (track && track.getCapabilities().torch) {
                 let torchOn = track.getSettings().torch;
-                track.applyConstraints
-                ({
+                track.applyConstraints({
                     advanced: [{torch: !torchOn}]
-                }).then(() => {
-                    console.log('Torch toggled');
                 }).catch(e => console.error('Error toggling the torch:', e));
             } else {
-                alert('Flashlight function not available or not supported on this device.');
-            }
-        });
-    </script>
+                alert('Flashlight function not available or notsupported on this device.');
+}
+});
+</script>
+
 </body>
 </html>
