@@ -115,21 +115,17 @@
 
                 videoInputSelect.onchange = () => {
                     selectedDeviceId = videoInputSelect.value;
-                    if (stream) { // If there's a stream running, stop it before changing the camera
-                        stream.getTracks().forEach(track => {
-                            track.stop();
-                        });
-                        // Restart scanning with the new camera
-                        startScanning();
-                    }
-                };
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-
-        document.getElementById('startButton').addEventListener('click', () => {
-            startScanning();
+                // Ensure the code from the previous snippet is completed
+                if (stream) {
+                    // Stop the current stream before changing the device
+                    let tracks = stream.getTracks();
+                    tracks.forEach(track => track.stop());
+                }
+                // Restart scanning with the new selected device
+                startScanning();
+            };
+        }).catch((err) => {
+            console.error(err);
         });
 
         document.getElementById('toggleFlash').addEventListener('click', () => {
@@ -143,17 +139,17 @@
                     const currentCount = scanCounts.get(result.text) || 0;
                     scanCounts.set(result.text, currentCount + 1);
                     updateTable();
-                }
-                if (err && !(err instanceof ZXing.NotFoundException)) {
+                } else if (err && !(err instanceof ZXing.NotFoundException)) {
                     console.error(err);
                 }
-            }).then((videoStream) => {
-                stream = videoStream; // Keep the stream to toggle the flashlight later
-            }).catch((err) => {
-                console.error(err);
+            }).then((streamObtained) => {
+                stream = streamObtained; // Keep the stream to be used for toggling the flashlight
             });
         }
+
+        document.getElementById('startButton').addEventListener('click', startScanning);
     </script>
+
 </body>
 </html>
 
