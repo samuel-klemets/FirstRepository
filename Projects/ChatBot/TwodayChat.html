@@ -5,21 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot Hemsida</title>
     <script src="https://herrfors-48hd.aiagent.fi/integrations/float/ai-agent-float.js"></script>
-    <!-- Lägg till CSS för knappdesign -->
+    <!-- CSS för knappdesign -->
     <style>
         .language-selector {
             position: absolute;
             top: 10px;
-            right: 10px;
+            right: 30px;
             display: flex;
         }
         .language-selector button {
-            background-color: #007BFF;
+            background-color: #43413e;
             color: #fff;
             border: none;
             cursor: pointer;
             padding: 8px 12px;
             margin-left: 10px;
+			margin-top: 40px;
             border-radius: 4px;
             font-size: 14px;
             transition: background-color 0.3s;
@@ -30,60 +31,91 @@
     </style>
 </head>
 <body style="overflow: hidden;">
-
-    <!-- Språkval uppe till höger med snyggare design -->
+    <!-- Språkvals-knappar -->
     <div class="language-selector">
-        <button onclick="changeLanguage('sv')">Svenska</button>
-        <button onclick="changeLanguage('fi')">Suomi</button>
-        <button onclick="changeLanguage('en')">English</button>
+        <button onclick="changeIframeLanguage('sv')">Svenska</button>
+        <button onclick="changeIframeLanguage('fi')">Suomi</button>
+        <button onclick="changeIframeLanguage('en')">English</button>
     </div>
 
-    <!-- AI Agent -->
-    <ai-agent-float
-        id="aiAgent"
-		header="Herrfors AI agent"
-        agent="d5cafaa4-55aa-41ff-b781-c8150fa19f0f"
-        server="https://herrfors-48hd.aiagent.fi/services/sva"
-        openwindowtext="Behöver du hjälp?"
-		feedbacktype="Basic"
-        greeting="Hej, hur kan jag hjälpa dig? ⚡🔌💡"
-		textinputplaceholder="Ställ en fråga..."
-		enablescroll="true" dense="true" style="position: relative; z-index: 9999;"
-		agenticon="https://i.imgur.com/kGeKLVB.png"
-		primary="#f49200"
-		<!--
-		agenticon="https://www.kssenergia.fi/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2F79vzmppdwnqd%2F6FcmWc7ltMXm7e5wKx1B9l%2F3909413a0318e74572f565d4388b64d1%2FKSS_Virtuaaliagentti_Sa__de_nega_RGB.png&amp;w=2048&amp;q=75" 
-		-->
-    </ai-agent-float>
+    <!-- Iframe -->
+    <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="1500"></iframe>
+
+    <!-- AI Agent Container -->
+    <div id="aiAgentContainer"></div>
 
     <!-- JavaScript för att hantera språkbyte -->
     <script>
-        function changeLanguage(lang) {
-            var aiAgent = document.getElementById('aiAgent');
-            var greetingText = '';
-            var openWindowText = '';
-			var textinputplaceholder = '';
+        // Funktion för att skapa AI-agenten
+        function createAIAgent(lang) {
+            var aiAgentContainer = document.getElementById('aiAgentContainer');
+
+            // Ta bort befintlig AI-agent om den finns
+            aiAgentContainer.innerHTML = '';
+
+            var aiAgent = document.createElement('ai-agent-float');
+            aiAgent.setAttribute('id', 'aiAgent');
+            aiAgent.setAttribute('header', 'Herrfors AI agent');
+            aiAgent.setAttribute('agent', 'd5cafaa4-55aa-41ff-b781-c8150fa19f0f');
+            aiAgent.setAttribute('server', 'https://herrfors-48hd.aiagent.fi/services/sva');
+            aiAgent.setAttribute('enablescroll', 'true');
+            aiAgent.setAttribute('dense', 'true');
+            aiAgent.setAttribute('style', 'position: relative; z-index: 9999;');
+            aiAgent.setAttribute('agenticon', 'https://i.imgur.com/kGeKLVB.png');
+            aiAgent.setAttribute('primary', '#f49200');
+
+            // Sätt språkbaserade attribut
             switch(lang) {
                 case 'sv':
-                    greetingText = 'Hej, hur kan jag hjälpa dig? ⚡🔌💡';
-                    openWindowText = 'Behöver du hjälp?';
-					textinputplaceholder = 'Ställ en fråga...';
+                    aiAgent.setAttribute('greeting', 'Hej, hur kan jag hjälpa dig? ⚡🔌💡');
+                    aiAgent.setAttribute('openwindowtext', 'Behöver du hjälp?');
+                    aiAgent.setAttribute('textinputplaceholder', 'Ställ en fråga...');
                     break;
                 case 'fi':
-                    greetingText = 'Hei, miten voin auttaa? ⚡🔌💡';
-                    openWindowText = 'Tarvitsetko apua?';
-					textinputplaceholder = 'Kysy minulta jotain...';
+                    aiAgent.setAttribute('greeting', 'Hei, miten voin auttaa? ⚡🔌💡');
+                    aiAgent.setAttribute('openwindowtext', 'Tarvitsetko apua?');
+                    aiAgent.setAttribute('textinputplaceholder', 'Kysy minulta jotain...');
                     break;
                 case 'en':
-                    greetingText = 'Hello, how can I help you? ⚡🔌💡';
-                    openWindowText = 'Do you need help?';
-					textinputplaceholder = 'Ask me anything...';
+                    aiAgent.setAttribute('greeting', 'Hello, how can I help you? ⚡🔌💡');
+                    aiAgent.setAttribute('openwindowtext', 'Do you need help?');
+                    aiAgent.setAttribute('textinputplaceholder', 'Ask me anything...');
                     break;
             }
-            aiAgent.setAttribute('greeting', greetingText);
-            aiAgent.setAttribute('openwindowtext', openWindowText);
-			aiAgent.setAttribute('textinputplaceholder', textinputplaceholder);
+
+            aiAgentContainer.appendChild(aiAgent);
         }
+
+        // Funktion för att ändra iframens språk och uppdatera agenten
+        function changeIframeLanguage(lang) {
+            var iframe = document.getElementById('myIframe');
+            iframe.src = 'https://herrfors.fi/' + lang;
+            createAIAgent(lang);
+        }
+
+        // Sätt agentens språk vid sidladdning
+        function setAgentLanguage() {
+            var lang = getLanguageFromIframeSrc();
+            createAIAgent(lang);
+        }
+
+        // Funktion för att hämta språk från iframens URL
+        function getLanguageFromIframeSrc() {
+            var iframe = document.getElementById('myIframe');
+            var src = iframe.src;
+            if (src.includes('/sv')) {
+                return 'sv';
+            } else if (src.includes('/fi')) {
+                return 'fi';
+            } else if (src.includes('/en')) {
+                return 'en';
+            } else {
+                return 'sv'; // Standardvärde
+            }
+        }
+
+        // Initialisera AI-agenten vid sidladdning
+        setAgentLanguage();
     </script>
 
 </body>
