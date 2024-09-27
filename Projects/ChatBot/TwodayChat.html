@@ -7,9 +7,9 @@
     <script src="https://herrfors-48hd.aiagent.fi/integrations/float/ai-agent-float.js"></script>
     <!-- Lägg till CSS för knappdesign -->
     <style>
-	     body {
-			margin: 0;
-			padding: 0;
+        body {
+            margin: 0;
+            padding: 0;
         }
         .language-selector {
             position: absolute;
@@ -24,7 +24,7 @@
             cursor: pointer;
             padding: 8px 12px;
             margin-left: 10px;
-			margin-top: 40px;
+            margin-top: 40px;
             border-radius: 4px;
             font-size: 14px;
             transition: background-color 0.3s;
@@ -54,10 +54,10 @@
         openwindowtext="Behöver du hjälp?"
         greeting="Hej, hur kan jag hjälpa dig? ⚡🔌💡"
         agenticon="https://i.imgur.com/kGeKLVB.png" 
-		textinputplaceholder="Ställ en fråga..."
-		feedbacktype="Basic"
+        textinputplaceholder="Ställ en fråga..."
+        feedbacktype="Basic"
         header="Herrfors AI chat">
-		
+        
     </ai-agent-float>
 
     <!-- JavaScript för att hantera språkbyte -->
@@ -66,25 +66,33 @@
             var aiAgent = document.getElementById('aiAgent');
             var greetingText = '';
             var openWindowText = '';
-			switch(lang) {
+            var textInputPlaceholder = '';
+
+            switch(lang) {
                 case 'sv':
-                    aiAgent.setAttribute('greeting', 'Hej, hur kan jag hjälpa dig? ⚡🔌💡');
-                    aiAgent.setAttribute('openwindowtext', 'Behöver du hjälp?');
-                    aiAgent.setAttribute('textinputplaceholder', 'Ställ en fråga...');
+                    greetingText = 'Hej, hur kan jag hjälpa dig? ⚡🔌💡';
+                    openWindowText = 'Behöver du hjälp?';
+                    textInputPlaceholder = 'Ställ en fråga...';
                     break;
                 case 'fi':
-                    aiAgent.setAttribute('greeting', 'Hei, miten voin auttaa? ⚡🔌💡');
-                    aiAgent.setAttribute('openwindowtext', 'Tarvitsetko apua?');
-                    aiAgent.setAttribute('textinputplaceholder', 'Kysy minulta jotain...');
+                    greetingText = 'Hei, miten voin auttaa? ⚡🔌💡';
+                    openWindowText = 'Tarvitsetko apua?';
+                    textInputPlaceholder = 'Kysy minulta jotain...';
                     break;
                 case 'en':
-                    aiAgent.setAttribute('greeting', 'Hello, how can I help you? ⚡🔌💡');
-                    aiAgent.setAttribute('openwindowtext', 'Do you need help?');
-                    aiAgent.setAttribute('textinputplaceholder', 'Ask me anything...');
+                    greetingText = 'Hello, how can I help you? ⚡🔌💡';
+                    openWindowText = 'Do you need help?';
+                    textInputPlaceholder = 'Ask me anything...';
                     break;
             }
+
             aiAgent.setAttribute('greeting', greetingText);
             aiAgent.setAttribute('openwindowtext', openWindowText);
+            aiAgent.setAttribute('textinputplaceholder', textInputPlaceholder);
+
+            // Ändra iframe URL baserat på valt språk
+            var iframe = document.getElementById('myIframe');
+            iframe.src = 'https://herrfors.fi/' + lang;
         }
     </script>
 
