@@ -76,6 +76,7 @@
         const codeReader = new ZXing.BrowserBarcodeReader();
         let scanCounts = new Map(); // Track scan counts
         let track = null; // This will hold the video track for flashlight control
+
         document.getElementById('startButton').addEventListener('click', function() {
             codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                 if (result) {
