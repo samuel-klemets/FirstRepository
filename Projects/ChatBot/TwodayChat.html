@@ -59,6 +59,7 @@
         feedbacktype="Basic"
         header="Herrfors AI chat"
         fontfamily="Interstate", sans-serif
+        disclaimer="Undvik att skriva personlig eller känslig information."
         >
         
         
@@ -71,28 +72,33 @@
             var greetingText = '';
             var openWindowText = '';
             var textInputPlaceholder = '';
+            var disclaimer = '';
 
             switch(lang) {
                 case 'sv':
                     greetingText = 'Hej, hur kan jag hjälpa dig? ⚡🔌💡';
                     openWindowText = 'Behöver du hjälp?';
                     textInputPlaceholder = 'Ställ en fråga...';
+                    disclaimer = 'Undvik att skriva personlig eller känslig information.';
                     break;
                 case 'fi':
                     greetingText = 'Hei, miten voin auttaa? ⚡🔌💡';
                     openWindowText = 'Tarvitsetko apua?';
                     textInputPlaceholder = 'Kysy minulta jotain...';
+                    disclaimer = 'Vältä henkilökohtaisten tai arkaluonteisten tietojen kirjoittamista.';
                     break;
                 case 'en':
                     greetingText = 'Hello, how can I help you? ⚡🔌💡';
                     openWindowText = 'Do you need help?';
                     textInputPlaceholder = 'Ask me anything...';
+                    disclaimer = 'Avoid writing personal or sensitive information.';
                     break;
             }
 
             aiAgent.setAttribute('greeting', greetingText);
             aiAgent.setAttribute('openwindowtext', openWindowText);
             aiAgent.setAttribute('textinputplaceholder', textInputPlaceholder);
+            aiAgent.setAttribute('disclaimer', disclaimer);
 
             // Ändra iframe URL baserat på valt språk
             var iframe = document.getElementById('myIframe');
