@@ -6,13 +6,11 @@
     <title>Chatbot Hemsida</title>
     <link href="https://fonts.cdnfonts.com/css/interstate-2?styles=52364" rel="stylesheet">
     <script src="https://herrfors-48hd.aiagent.fi/integrations/float/ai-agent-float.js"></script>
-    <!-- Lägg till CSS för knappdesign -->
     <style>
         body {
             margin: 0;
             padding: 0;
         }
-        
         .language-selector {
             position: absolute;
             top: 10px;
@@ -20,7 +18,7 @@
             display: flex;
         }
         .language-selector button {
-            background-color: #43413e;
+            background-color: #f57c00;
             color: #fff;
             border: none;
             cursor: pointer;
@@ -32,79 +30,68 @@
             transition: background-color 0.3s;
         }
         .language-selector button:hover {
-            background-color: #0056b3;
+            background-color: #ff9800;
         }
     </style>
 </head>
 <body style="overflow: hidden;">
 
-    <!-- Språkval uppe till höger med snyggare design -->
     <div class="language-selector">
         <button onclick="changeLanguage('sv')">Svenska</button>
         <button onclick="changeLanguage('fi')">Suomi</button>
         <button onclick="changeLanguage('en')">English</button>
     </div>
 
-    <!-- Iframe -->
     <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="1500" frameBorder="0" style="border: none;"></iframe>
 
-    <!-- AI Agent -->
-    <ai-agent-float
-        id="aiAgent"
-        agent="d5cafaa4-55aa-41ff-b781-c8150fa19f0f"
-        server="https://herrfors-48hd.aiagent.fi/services/sva"
-        openwindowtext="Behöver du hjälp?"
-        greeting="Hej, hur kan jag hjälpa dig? ⚡🔌🔋"
-        agenticon="https://i.imgur.com/kGeKLVB.png" 
-        textinputplaceholder="Ställ en fråga..."
-        feedbacktype="Basic"
-        header="Herrfors AI chat"
-        fontfamily="Interstate"
-        disclaimer="Undvik att skriva personlig eller känslig information."
-        >
-        
-        
-    </ai-agent-float>
+    <ai-agent-float-container 
+        agent-icon="image_10.png" 
+        open-window-text="Behöver du hjälp?"
+        background="none"
+        backgroundpaper="false">
+        <ai-agent-float
+            id="aiAgent"
+            agent="d5cafaa4-55aa-41ff-b781-c8150fa19f0f"
+            server="https://herrfors-48hd.aiagent.fi/services/sva"
+            greeting="Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15)."
+            agenticon="wattson-13 (1).png" 
+            header="Wattson"
+            textinputplaceholder="Ställ en fråga..."
+            agentname="Wattson"
+            feedbacktype="Basic"
+            fontfamily="Interstate"
+            style="border: none;"
+        ></ai-agent-float>
+    </ai-agent-float-container>
 
-    <!-- JavaScript för att hantera språkbyte -->
     <script>
         function changeLanguage(lang) {
             var aiAgent = document.getElementById('aiAgent');
             var greetingText = '';
             var openWindowText = '';
             var textInputPlaceholder = '';
-            var disclaimer = '';
 
             switch(lang) {
                 case 'sv':
-                    greetingText = 'Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder Al för att hjälpa dig med dina energifrågor. Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig. Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info(öherrfors.fi / (06) 7815 300 (vardagar kl. 10-15)';
+                    greetingText = `Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15).`;
                     openWindowText = 'Behöver du hjälp?';
                     textInputPlaceholder = 'Ställ en fråga...';
-                    disclaimer = 'Undvik att skriva personlig eller känslig information.';
                     break;
                 case 'fi':
-                    greetingText = 'Hei, miten voin auttaa? ⚡🔌🔋';
+                    greetingText = `Hei! Olen Herrforsin virtuaalinen asiakasneuvoja Wattson.<br><br>Olen pieni mutta energinen chatbot, ja käytän tekoälyä auttaakseni sinua energia-asioissa.<br><br>Olen vielä uusi työssäni, mutta opin nopeasti!<br><br>Esitä lyhyt ja selkeä kysymys, niin teen parhaani löytääkseni sinulle vastauksen.<br><br>Älä koskaan jaa henkilökohtaisia tietoja chatbotin kautta.<br><br>Sopimus- tai laskutusasioissa saat apua asiakaspalvelustamme: info@herrfors.fi / (06) 7815 300 (arkisin klo 10–15).`;
                     openWindowText = 'Tarvitsetko apua?';
                     textInputPlaceholder = 'Kysy minulta jotain...';
-                    disclaimer = 'Vältä henkilökohtaisten tai arkaluonteisten tietojen kirjoittamista.';
                     break;
                 case 'en':
-                    greetingText = 'Hello, how can I help you? ⚡🔌🔋';
+                    greetingText = `Hi! I’m Herrfors’ virtual customer advisor Wattson.<br><br>I’m a small but energetic chatbot that uses AI to help you with your energy questions.`;
                     openWindowText = 'Do you need help?';
                     textInputPlaceholder = 'Ask me anything...';
-                    disclaimer = 'Avoid writing personal or sensitive information.';
                     break;
             }
 
             aiAgent.setAttribute('greeting', greetingText);
             aiAgent.setAttribute('openwindowtext', openWindowText);
             aiAgent.setAttribute('textinputplaceholder', textInputPlaceholder);
-            aiAgent.setAttribute('disclaimer', disclaimer);
-            
-
-            // Ändra iframe URL baserat på valt språk
-            var iframe = document.getElementById('myIframe');
-            iframe.src = 'https://herrfors.fi/' + lang;
         }
     </script>
 
