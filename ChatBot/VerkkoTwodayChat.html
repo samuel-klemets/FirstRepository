@@ -32,6 +32,12 @@
         .language-selector button:hover {
             background-color: #ff9800;
         }
+        ai-agent-float,
+        ai-agent-float *,
+        ai-agent-float li,
+        ai-agent-float ul {
+            font-family: 'Interstate', sans-serif !important;
+        }
     </style>
 </head>
 <body style="overflow: hidden;">
@@ -46,16 +52,11 @@
 
     <div class="chat-icon-border">
         <ai-agent-float-container>
-            <div style="  
-                display: flex;  
-                flex-direction: row;  
-                gap: 1em;  
-                padding: 1em;  
-                align-items: center;  
-                justify-content: space-between;  
-                flex-grow: 1;  
-                " slot="header">
+            <div style="" slot="header">
             <ai-agent-text color="primarycontrast"></ai-agent-text>
+            </div>
+            <div style="" slot="List">
+                <ai-agent-text fontfamily="interstate"></ai-agent-text>
             </div>
             <ai-agent-float
                 id="aiAgent"
@@ -67,7 +68,7 @@
                 textinputplaceholder="Ställ en fråga..."
                 agentname="Wattson"
                 feedbacktype="Basic"
-                fontfamily="Interstate"
+                fontfamily="Interstate, sans-serif"
                 primary="#5d5d5d"
                 primarycontrast="#ffffff"
                 openwindowtext="Hej! Hur kan jag hjälpa dig?"
@@ -92,21 +93,21 @@
                     openWindowText = 'Hej! Hur kan jag hjälpa dig?';
                     textInputPlaceholder = 'Ställ en fråga...';
                     header = 'Fråga Wattson om hjälp';
-                    iframe.src = 'https://herrfors.fi/sv';
+                    iframe.src = 'https://www.herrforsnat.fi/sv';
                     break;
                 case 'fi':
                     greetingText = `Hei! Olen Herrfors Nät-Verkon virtuaalinen asiakasneuvoja Wattson. Olen pieni mutta energinen chatbot, ja käytän tekoälyä auttaakseni sinua sähkönjakelu-asioissa.<br><br>Olen vielä uusi työssäni, mutta opin nopeasti! Esitä lyhyt ja selkeä kysymys, niin teen parhaani löytääkseni sinulle vastauksen.<br><br>Älä koskaan jaa henkilökohtaisia tietoja chatbotin kautta. Sopimus- tai laskutusasioissa saat apua asiakaspalvelustamme: info@herrfors.fi / (06) 7815 300 (arkisin klo 10–15).`;
                     openWindowText = 'Hei! Miten voin auttaa?';
                     textInputPlaceholder = 'Kysy minulta jotain...';
                     header = 'Kysy apua Wattsonilta';
-                    iframe.src = 'https://herrfors.fi/fi';
+                    iframe.src = 'https://www.herrforsnat.fi';
                     break;
                 case 'en':
                     greetingText = `Hi! I’m Herrfors Nät-Verkko’s virtual customer advisor Wattson. I’m a small but energetic chatbot that uses AI to help you with your questions regarding energy transmission.<br><br>I’m still new at my job, but I’m learning quickly! Ask me a short and clear question, and I’ll do my best to find the answer for you.<br><br>Remember, never share personal information through the chatbot. For specific questions about contracts or billing, please contact our customer service at info@herrfors.fi or (06) 7815 300 (weekdays 10 AM–3 PM).`;
                     openWindowText = 'Hi! How can I help?';
                     textInputPlaceholder = 'Ask me anything...';
                     header = 'Ask Wattson for help';
-                    iframe.src = 'https://herrfors.fi/en';
+                    iframe.src = 'https://www.herrforsnat.fi/en';
                     break;
             }
 
