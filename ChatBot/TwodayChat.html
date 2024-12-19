@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Hemsida</title>
+    <title>Wattson</title>
     <link href="https://fonts.cdnfonts.com/css/interstate-2?styles=52364" rel="stylesheet">
     <script src="https://herrfors-48hd.aiagent.fi/integrations/float/ai-agent-float.js"></script>
     <style>
@@ -79,6 +79,7 @@
     <script>
         function changeLanguage(lang) {
             var aiAgent = document.getElementById('aiAgent');
+            var iframe = document.getElementById('myIframe');
             var greetingText = '';
             var openWindowText = '';
             var textInputPlaceholder = '';
@@ -90,18 +91,21 @@
                     openWindowText = 'Hej! Hur kan jag hjälpa dig?';
                     textInputPlaceholder = 'Ställ en fråga...';
                     header = 'Fråga Wattson om hjälp';
+                    iframe.src = 'https://herrfors.fi/sv';
                     break;
                 case 'fi':
-                    greetingText = `Hei! Olen Herrforsin virtuaalinen asiakasneuvoja Wattson. Olen pieni mutta energinen chatbot, ja käytän tekoälyä auttaakseni sinua energia-asioissa.<br><br>Olen vielä uusi työssäni, mutta opin nopeasti! Esitä lyhyt ja selkeä kysymys, niin teen parhaani löytääkseni sinulle vastauksen.<br><br>Älä koskaan jaa henkilökohtaisia tietoja chatbotin kautta. Sopimus- tai laskutusasioissa saat apua asiakaspalvelustamme: info@herrfors.fi / (06) 7815 300 (arkisin klo 10–15).`;
+                    greetingText = `Hei! Olen Herrforsin virtuaalinen asiakasneuvoja Wattson.`;
                     openWindowText = 'Hei! Miten voin auttaa?';
                     textInputPlaceholder = 'Kysy minulta jotain...';
                     header = 'Kysy apua Wattsonilta';
+                    iframe.src = 'https://herrfors.fi/fi';
                     break;
                 case 'en':
-                    greetingText = `Hi! I’m Herrfors’ virtual customer advisor Wattson.<br><br>I’m a small but energetic chatbot that uses AI to help you with your energy questions. `;
+                    greetingText = `Hi! I’m Herrfors’ virtual customer advisor Wattson. I’m a small but energetic chatbot that uses AI to help you with your energy questions<br><br>I’m still new at my job, but I’m learning quickly! Ask me a short and clear question, and I’ll do my best to find the answer for you.<br><br>Remember, never share personal information through the chatbot. For specific questions about contracts or billing, please contact our customer service at info@herrfors.fi or (06) 7815 300 (weekdays 10 AM–3 PM).`;
                     openWindowText = 'Hi! How can I help?';
                     textInputPlaceholder = 'Ask me anything...';
-                    header ='Ask Wattson for help';
+                    header = 'Ask Wattson for help';
+                    iframe.src = 'https://herrfors.fi/en';
                     break;
             }
 
@@ -110,7 +114,6 @@
             aiAgent.setAttribute('textinputplaceholder', textInputPlaceholder);
             aiAgent.setAttribute('header', header);
         }
-
     </script>
 
 </body>
