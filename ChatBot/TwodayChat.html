@@ -32,11 +32,6 @@
         .language-selector button:hover {
             background-color: #ff9800;
         }
-        .chat-icon-border {
-            border: 10px solid #ffffff;
-            border-radius: 50%;
-            display: inline-block;
-        }
     </style>
 </head>
 <body style="overflow: hidden;">
@@ -51,6 +46,17 @@
 
     <div class="chat-icon-border">
         <ai-agent-float-container>
+            <div style="  
+            display: flex;  
+            flex-direction: row;  
+            gap: 1em;  
+            padding: 1em;  
+            align-items: center;  
+            justify-content: space-between;  
+            flex-grow: 1;  
+            " slot="header">
+        <ai-agent-text color="primarycontrast"></ai-agent-text>
+        </div>
             <ai-agent-float
                 id="aiAgent"
                 agent="d5cafaa4-55aa-41ff-b781-c8150fa19f0f"
@@ -58,6 +64,7 @@
                 greeting="Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15)."
                 agenticon="Wattson_icon 1.png"
                 header="Fråga Wattson om hjälp"
+                primarycontrast ="#ffffff"
                 textinputplaceholder="Ställ en fråga..."
                 agentname="Wattson"
                 feedbacktype="Basic"
@@ -67,12 +74,6 @@
                 waitingmessage10s="Jaa..."            
                 >
             </ai-agent-float>
-
-            <ai-agent-icon-button
-            icon="chat"
-            color="primarycontrast" aria-label="Open menu">
-            </ai-agent-icon-button>
-
         </ai-agent-float-container>
     </div>
 
