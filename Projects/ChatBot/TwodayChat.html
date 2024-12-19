@@ -18,7 +18,7 @@
             display: flex;
         }
         .language-selector button {
-            background-color: #f57c00;
+            background-color: #555555;
             color: #fff;
             border: none;
             cursor: pointer;
@@ -32,6 +32,11 @@
         .language-selector button:hover {
             background-color: #ff9800;
         }
+        .chat-icon-border {
+            border: 10px solid #ffffff;
+            border-radius: 50%;
+            display: inline-block;
+        }
     </style>
 </head>
 <body style="overflow: hidden;">
@@ -44,25 +49,32 @@
 
     <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="1500" frameBorder="0" style="border: none;"></iframe>
 
-    <ai-agent-float-container 
-        agent-icon="image_10.png" 
-        open-window-text="Behöver du hjälp?"
-        background="none"
-        backgroundpaper="false">
-        <ai-agent-float
-            id="aiAgent"
-            agent="d5cafaa4-55aa-41ff-b781-c8150fa19f0f"
-            server="https://herrfors-48hd.aiagent.fi/services/sva"
-            greeting="Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15)."
-            agenticon="wattson-13 (1).png" 
-            header="Wattson"
-            textinputplaceholder="Ställ en fråga..."
-            agentname="Wattson"
-            feedbacktype="Basic"
-            fontfamily="Interstate"
-            style="border: none;"
-        ></ai-agent-float>
-    </ai-agent-float-container>
+    <div class="chat-icon-border">
+        <ai-agent-float-container>
+            <ai-agent-float
+                id="aiAgent"
+                agent="d5cafaa4-55aa-41ff-b781-c8150fa19f0f"
+                server="https://herrfors-48hd.aiagent.fi/services/sva"
+                greeting="Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15)."
+                agenticon="Wattson_icon 1.png"
+                header="Fråga Wattson om hjälp"
+                textinputplaceholder="Ställ en fråga..."
+                agentname="Wattson"
+                feedbacktype="Basic"
+                fontfamily="Interstate"
+                primary="#ffb339"
+                openwindowtext="Hej! Hur kan jag hjälpa dig?"
+                waitingmessage10s="Jaa..."            
+                >
+            </ai-agent-float>
+
+            <ai-agent-icon-button
+            icon="chat"
+            color="primarycontrast" aria-label="Open menu">
+            </ai-agent-icon-button>
+
+        </ai-agent-float-container>
+    </div>
 
     <script>
         function changeLanguage(lang) {
@@ -70,29 +82,35 @@
             var greetingText = '';
             var openWindowText = '';
             var textInputPlaceholder = '';
+            var header = '';
 
             switch(lang) {
                 case 'sv':
                     greetingText = `Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15).`;
-                    openWindowText = 'Behöver du hjälp?';
+                    openWindowText = 'Hej! Hur kan jag hjälpa dig?';
                     textInputPlaceholder = 'Ställ en fråga...';
+                    header = 'Fråga Wattson om hjälp';
                     break;
                 case 'fi':
-                    greetingText = `Hei! Olen Herrforsin virtuaalinen asiakasneuvoja Wattson.<br><br>Olen pieni mutta energinen chatbot, ja käytän tekoälyä auttaakseni sinua energia-asioissa.<br><br>Olen vielä uusi työssäni, mutta opin nopeasti!<br><br>Esitä lyhyt ja selkeä kysymys, niin teen parhaani löytääkseni sinulle vastauksen.<br><br>Älä koskaan jaa henkilökohtaisia tietoja chatbotin kautta.<br><br>Sopimus- tai laskutusasioissa saat apua asiakaspalvelustamme: info@herrfors.fi / (06) 7815 300 (arkisin klo 10–15).`;
-                    openWindowText = 'Tarvitsetko apua?';
+                    greetingText = `Hei! Olen Herrforsin virtuaalinen asiakasneuvoja Wattson. Olen pieni mutta energinen chatbot, ja käytän tekoälyä auttaakseni sinua energia-asioissa.<br><br>Olen vielä uusi työssäni, mutta opin nopeasti! Esitä lyhyt ja selkeä kysymys, niin teen parhaani löytääkseni sinulle vastauksen.<br><br>Älä koskaan jaa henkilökohtaisia tietoja chatbotin kautta. Sopimus- tai laskutusasioissa saat apua asiakaspalvelustamme: info@herrfors.fi / (06) 7815 300 (arkisin klo 10–15).`;
+                    openWindowText = 'Hei! Miten voin auttaa?';
                     textInputPlaceholder = 'Kysy minulta jotain...';
+                    header = 'Kysy apua Wattsonilta';
                     break;
                 case 'en':
-                    greetingText = `Hi! I’m Herrfors’ virtual customer advisor Wattson.<br><br>I’m a small but energetic chatbot that uses AI to help you with your energy questions.`;
-                    openWindowText = 'Do you need help?';
+                    greetingText = `Hi! I’m Herrfors’ virtual customer advisor Wattson.<br><br>I’m a small but energetic chatbot that uses AI to help you with your energy questions. `;
+                    openWindowText = 'Hi! How can I help?';
                     textInputPlaceholder = 'Ask me anything...';
+                    header ='Ask Wattson for help';
                     break;
             }
 
             aiAgent.setAttribute('greeting', greetingText);
             aiAgent.setAttribute('openwindowtext', openWindowText);
             aiAgent.setAttribute('textinputplaceholder', textInputPlaceholder);
+            aiAgent.setAttribute('header', header);
         }
+
     </script>
 
 </body>
