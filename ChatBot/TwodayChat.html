@@ -39,13 +39,6 @@
         ai-agent-float ul {
             font-family: 'Interstate', sans-serif !important;
         }
-        .cookie-banner {
-            z-index: 9999 !important; /* Se till att det är framför allt */
-            display: block !important; /* Tvinga fram att den är synlig */
-            position: fixed; /* Positionera fast för att alltid visas */
-            top: 500; /* Lägg den längst ner på skärmen */
-            width: 100%; /* Se till att den täcker hela skärmen */
-}
     </style>
 </head>
 <body>
@@ -56,11 +49,7 @@
         <button onclick="changeLanguage('en')">English</button>
     </div>
 
-    <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="1500" frameBorder="0" style="border: none;"></iframe>
-    <div class="cookie-banner">
-        Vi använder cookies. <button onclick="acceptCookies()">Godkänn</button>
-    </div>
-
+    <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="50%" frameBorder="0" style="border: none;"></iframe>
 
     <div class="chat-icon-border">
         <ai-agent-float-container>
@@ -132,10 +121,6 @@
             aiAgent.setAttribute('openwindowtext', openWindowText);
             aiAgent.setAttribute('textinputplaceholder', textInputPlaceholder);
             aiAgent.setAttribute('header', header);
-        }
-        function acceptCookies() {
-            document.querySelector('.cookie-banner').style.display = 'none';
-        }
     </script>
 
 </body>
