@@ -10,6 +10,7 @@
         body {
             margin: 0;
             padding: 0;
+            overflow: auto !important; /* Ändra overflow till auto */
         }
         .language-selector {
             position: absolute;
@@ -38,9 +39,16 @@
         ai-agent-float ul {
             font-family: 'Interstate', sans-serif !important;
         }
+        .cookie-banner {
+            z-index: 9999 !important; /* Se till att det är framför allt */
+            display: block !important; /* Tvinga fram att den är synlig */
+            position: fixed; /* Positionera fast för att alltid visas */
+            bottom: 0; /* Lägg den längst ner på skärmen */
+            width: 100%; /* Se till att den täcker hela skärmen */
+}
     </style>
 </head>
-<body style="overflow: hidden;">
+<body>
 
     <div class="language-selector">
         <button onclick="changeLanguage('sv')">Svenska</button>
