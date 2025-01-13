@@ -41,7 +41,7 @@
         }
     </style>
 </head>
-<body>
+<body style="overflow: hidden;">
 
     <div class="language-selector">
         <button onclick="changeLanguage('sv')">Svenska</button>
@@ -49,19 +49,11 @@
         <button onclick="changeLanguage('en')">English</button>
     </div>
 
-    <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="1300" frameBorder="0" style="border: none;"></iframe>
+    <iframe id="myIframe" src="https://herrfors.fi/sv" width="100%" height="1500" frameBorder="0" style="border: none;"></iframe>
 
     <div class="chat-icon-border">
         <ai-agent-float-container>
-            <div style="  
-            display: flex;  
-            flex-direction: row;  
-            gap: 1em;  
-            padding: 1em;  
-            align-items: center;  
-            justify-content: space-between;  
-            flex-grow: 1;  
-            " slot="header">
+            <div style="" slot="header">
         <ai-agent-text color="primarycontrast"></ai-agent-text>
         </div>
             <ai-agent-float
@@ -71,13 +63,13 @@
                 greeting="Hej! Jag är Herrfors virtuella kundrådgivare Wattson. Jag är en liten men energisk chatbot som använder AI för att hjälpa dig med dina energifrågor.<br><br>Jag är fortfarande ny på jobbet, men jag lär mig snabbt! Ställ en kort och tydlig fråga, så gör jag mitt bästa för att hitta svaret åt dig.<br><br>Kom ihåg att aldrig uppge personlig information via chatbotten. För specifika frågor gällande avtal eller fakturering, kontakta vår kundbetjäning info@herrfors.fi / (06) 7815 300 (vardagar kl. 10-15)."
                 agenticon="Wattson.png"
                 header="Fråga Wattson om hjälp"
-                primarycontrast ="#ffffff"
                 textinputplaceholder="Ställ en fråga..."
                 agentname="Wattson"
                 feedbacktype="Basic"
                 fontfamily="Interstate"
                 primary="#ffb339"
-                openwindowtext="Hej! Hur kan jag hjälpa dig?"        
+                primarycontrast="#ffffff"
+                openwindowtext="Hej! Hur kan jag hjälpa dig?"
                 >
             </ai-agent-float>
         </ai-agent-float-container>

@@ -10,6 +10,7 @@
         body {
             margin: 0;
             padding: 0;
+            overflow: auto !important; /* Ändra overflow till auto */
         }
         .language-selector {
             position: absolute;
@@ -53,11 +54,8 @@
     <div class="chat-icon-border">
         <ai-agent-float-container>
             <div style="" slot="header">
-            <ai-agent-text color="primarycontrast"></ai-agent-text>
-            </div>
-            <div style="" slot="List">
-                <ai-agent-text fontfamily="interstate"></ai-agent-text>
-            </div>
+        <ai-agent-text color="primarycontrast"></ai-agent-text>
+        </div>
             <ai-agent-float
                 id="aiAgent"
                 agent="06cbfa78-0ecf-4899-bbb7-6ed3571655e8"
@@ -68,7 +66,7 @@
                 textinputplaceholder="Ställ en fråga..."
                 agentname="Wattson"
                 feedbacktype="Basic"
-                fontfamily="Interstate, sans-serif"
+                fontfamily="Interstate"
                 primary="#5d5d5d"
                 primarycontrast="#ffffff"
                 openwindowtext="Hej! Hur kan jag hjälpa dig?"
