@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Elli Chat History Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" defer></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" defer></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #e8eaed 0%, #d5d8dc 100%);
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .top-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        
+        .control-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .control-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9aa0a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 2px;
+        }
+
+        /* Custom File Upload Styling */
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 44px;
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 4px 6px;
+            min-width: 300px;
+            transition: all 0.2s;
+            box-sizing: border-box; /* Fixar höjden så padding ingår */
+        }
+        .file-input-container:hover {
+            background: #fff;
+            border-color: #bdc1c6;
+        }
+        .file-upload-btn {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            padding: 0 16px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #3c4043;
+            transition: all 0.2s;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .file-upload-btn:hover {
+            background: #f1f3f4;
+            color: #202124;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #fileName {
+            font-size: 14px;
+            color: #5f6368;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        
+        /* Date Input Styling */
+        #startDate {
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #3c4043;
+            width: 160px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        #startDate:focus {
+            outline: none;
+            border-color: #3498db;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        /* Button Styling */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            height: 44px;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #processBtn {
+            background-color: #3498db;
+            color: white;
+            min-width: 120px;
+        }
+        #processBtn:hover {
+            background-color: #2980b9;
+        }
+        #clearFilterBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        #clearFilterBtn:hover {
+            background-color: #c0392b;
+        }
+        #filterBtn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        #filterBtn:hover {
+            background-color: #27ae60;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .card, .month-row {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover, .month-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .card h3 {
+            margin: 3px 0;
+            font-size: 13px;
+            color: #2c3e50;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .card p {
+            margin: 3px 0;
+            font-size: 22px;
+            font-weight: 500;
+            color: #3498db;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        canvas {
+            width: 100% !important;
+            max-height: 200px;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        #monthChart, #timeChart {
+            height: 200px !important;
+            min-height: 200px;
+        }
+        #weekdayCharts {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            grid-column: 1 / -1;
+            margin-top: 0; /* Removed margin to match upper spacing */
+        }
+        .month-row {
+            grid-column: span 1;
+        }
+        #status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            min-height: 20px;
+        }
+        
+        /* Trend chart section */
+        .trend-section {
+            grid-column: 1 / -1;
+            margin-top: 8px;
+        }
+        .trend-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 10px;
+            padding: 12px 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: box-shadow 0.2s ease;
+        }
+        .trend-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .trend-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 500;
+            text-align: center;
+        }
+        #trendChart {
+            height: 260px !important;
+            max-height: 260px !important;
+        }
+        #timeTrendChart, #weekdayTrendChart {
+            height: 220px !important;
+            max-height: 220px !important;
+        }
+        .trend-controls {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .trend-controls button {
+            padding: 6px 14px;
+            font-size: 11px;
+            border-radius: 15px;
+            transition: all 0.2s ease;
+            background-color: #f1f3f4;
+            color: #5f6368;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        .trend-controls button:hover {
+            background-color: #e8eaed;
+            color: #202124;
+            transform: translateY(-1px);
+        }
+        .trend-controls button.active {
+            background: #8ab4f8; /* Lighter blue/grayish color */
+            color: #174ea6; /* Darker blue text for contrast */
+            border-color: #8ab4f8;
+            box-shadow: 0 1px 2px rgba(66, 133, 244, 0.3);
+        }
+        .search-section {
+            grid-column: 1 / -1;
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0; /* Removed margin to equal upper spacing */
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header {
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        .modal-header .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        .modal-header .close-btn:hover {
+            color: #e74c3c;
+        }
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .conversation-item {
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            background-color: #f0f2f5; /* Darker background for the whole conversation block */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .conversation-header {
+            background: #dfe4ea; /* Darker header */
+            padding: 12px 15px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2c3e50;
+            border-bottom: 1px solid #dcdcdc;
+            display: flex;
+            justify-content: space-between;
+        }
+        .qa-pair {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #fff; /* Keep content white for contrast */
+            margin: 10px; /* Add margin to create "card inside card" effect */
+            border-radius: 6px;
+            border: 1px solid #eaeaea;
+        }
+        .qa-pair:last-child {
+            margin-bottom: 10px;
+        }
+        .question {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .question-label {
+            font-size: 11px;
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .answer {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .answer-label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .modal-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .modal-stat {
+            text-align: center;
+        }
+        .modal-stat-value {
+            font-size: 24px;
+            font-weight: 500;
+            color: #3498db;
+        }
+        .modal-stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elli Chat History Viewer</h1>
+        <div class="top-card">
+            <div class="control-wrapper">
+                <label class="control-label">CSV File</label>
+                <div class="file-input-container">
+                    <label for="csvFile" class="file-upload-btn">Choose File</label>
+                    <input type="file" id="csvFile" accept=".csv" style="display: none;" onchange="updateFileName(this)" />
+                    <span id="fileName">No file chosen</span>
+                </div>
+            </div>
+            
+            <div class="control-wrapper">
+                <label class="control-label">Start Date</label>
+                <input type="text" id="startDate" readonly placeholder="Select date..." />
+            </div>
+
+            <div class="action-buttons">
+                <button id="processBtn" onclick="processFile()">Load Data</button>
+                <button id="filterBtn" onclick="applyDateFilter()" style="display: none;">Apply Filter</button>
+                <button id="clearFilterBtn" onclick="clearDateFilter()" style="display: none;">Clear Filter</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="dashboard" style="display: none;">
+            <div class="card">
+                <h3>Total Conversations</h3>
+                <p id="totalConversations">0</p>
+            </div>
+            <div class="card">
+                <h3>Total Questions</h3>
+                <p id="totalQuestions">0</p>
+            </div>
+            <div class="card">
+                <canvas id="monthChart"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="timeChart"></canvas>
+            </div>
+            
+            <!-- Trend comparison section -->
+            <div class="trend-section">
+                <div class="trend-card">
+                    <h3>Category Trends Over Time</h3>
+                    <div class="trend-controls">
+                        <button id="trendLineBtn" class="active" onclick="setTrendChartType('line')">Line Chart</button>
+                        <button id="trendStackedBtn" onclick="setTrendChartType('stacked')">Stacked Bar</button>
+                        <button id="trendGroupedBtn" onclick="setTrendChartType('grouped')">Grouped Bar</button>
+                    </div>
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Time of Day trend section -->
+            <div class="trend-section">
+                <div class="trend-card">
+                    <h3>Time of Day Over Time</h3>
+                    <div class="trend-controls">
+                        <button id="timeLineBtn" class="active" onclick="setTimeTrendChartType('line')">Line Chart</button>
+                        <button id="timeStackedBtn" onclick="setTimeTrendChartType('stacked')">Stacked Bar</button>
+                        <button id="timeGroupedBtn" onclick="setTimeTrendChartType('grouped')">Grouped Bar</button>
+                    </div>
+                    <canvas id="timeTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Weekdays trend section -->
+            <div class="trend-section">
+                <div class="trend-card">
+                    <h3>Weekdays Over Time</h3>
+                    <div class="trend-controls">
+                        <button id="weekdayLineBtn" class="active" onclick="setWeekdayTrendChartType('line')">Line Chart</button>
+                        <button id="weekdayStackedBtn" onclick="setWeekdayTrendChartType('stacked')">Stacked Bar</button>
+                        <button id="weekdayGroupedBtn" onclick="setWeekdayTrendChartType('grouped')">Grouped Bar</button>
+                    </div>
+                    <canvas id="weekdayTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" placeholder="Search for keywords in conversations..." onkeyup="handleSearch(event)">
+                <button id="searchBtn" onclick="applySearch()">Search</button>
+                <button id="clearSearchBtn" onclick="clearSearch()" style="display: none; background-color: #e74c3c;">Clear</button>
+            </div>
+
+            <div id="weekdayCharts"></div>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <!-- Modal for viewing conversations -->
+    <div id="conversationModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalTitle">Conversations</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .search-section {
+            grid-column: 1 / -1;
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        #searchInput {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        #searchBtn, #clearSearchBtn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        /* Modern Datepicker Styling */
+        .ui-datepicker {
+            background-color: #fff;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            font-family: 'Roboto', sans-serif;
+            padding: 15px;
+            width: 280px;
+        }
+        .ui-datepicker-header {
+            background: transparent;
+            border: none;
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 5px 0 15px;
+        }
+        .ui-datepicker-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .ui-datepicker-prev, .ui-datepicker-next {
+            cursor: pointer;
+            top: 8px !important;
+        }
+        .ui-datepicker-prev span, .ui-datepicker-next span {
+            filter: opacity(0.6);
+        }
+        .ui-datepicker-calendar th {
+            color: #9aa0a6;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 0;
+        }
+        .ui-datepicker-calendar td {
+            padding: 2px;
+        }
+        .ui-state-default, .ui-widget-content .ui-state-default {
+            background: transparent;
+            border: none;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #3c4043;
+            border-radius: 50%; /* Make selection round */
+            width: 32px;
+            height: 32px;
+            line-height: 16px; /* Adjust line-height for vertical centering */
+            margin: 0 auto;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ui-state-default:hover {
+            background-color: #f1f3f4;
+            color: #202124;
+        }
+        .ui-state-highlight, .ui-widget-content .ui-state-highlight {
+            background-color: #e8f0fe;
+            color: #1967d2;
+            font-weight: 500;
+        }
+        .ui-state-active, .ui-widget-content .ui-state-active {
+            background-color: #3498db !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+        }
+        /* Remove old UI icons if needed, or style them better. jQuery UI icons are sprites. */
+        .ui-icon {
+            /* Keep default icons but maybe adjust opacity */
+        }
+        /* Custom select menus in header */
+        .ui-datepicker select.ui-datepicker-month, 
+        .ui-datepicker select.ui-datepicker-year {
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            color: #3c4043;
+            margin: 0 2px;
+        }
+    </style>
+
+    <script>
+        let selectedFile = null;
+        let charts = [];
+        let trendChart = null;
+        let timeTrendChart = null;
+        let weekdayTrendChart = null;
+        let currentTrendType = 'line';
+        let currentTimeTrendType = 'line';
+        let currentWeekdayTrendType = 'line';
+        let currentStats = null;
+        let allConversationsData = {};
+        let allFlatData = []; // Store all data for filtering
+        
+        function updateFileName(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('fileName').textContent = input.files[0].name;
+                selectedFile = input.files[0];
+            } else {
+                document.getElementById('fileName').textContent = 'No file chosen';
+                selectedFile = null;
+            }
+        }
+        
+        // Initialize datepicker when jQuery is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof $ !== 'undefined' && $.fn.datepicker) {
+                $('#startDate').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    onSelect: function() {
+                        if (allFlatData.length > 0) {
+                            document.getElementById('filterBtn').style.display = 'inline-block';
+                        }
+                    }
+                });
+            }
+        });
+
+        const categoryList = [
+            "Contract & Agreements",
+            "Electricity Sales",
+            "Power Grid & Infrastructure",
+            "Application Related",
+            "District Heating",
+            "General support"
+        ];
+
+        const categoryColors = { 
+            "Contract & Agreements": '#3498db',
+            "Electricity Sales": '#e67e22',
+            "Power Grid & Infrastructure": '#2c3e50',
+            "Application Related": '#27ae60',
+            "District Heating": '#8e44ad',
+            "General support": '#95a5a6'
+        };
+
+        const weekdaysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const weekdayColorsMap = { Monday: '#3498db', Tuesday: '#e67e22', Wednesday: '#2c3e50', Thursday: '#27ae60', Friday: '#8e44ad', Saturday: '#e74c3c', Sunday: '#f1c40f' };
+        
+        const timeOfDayLabels = ['Office Hours (08-16)', 'Evening (16-22)', 'Night (22-08)'];
+        const timeOfDayKeys = ['office', 'evening', 'night'];
+        const timeOfDayColors = ['#3498db', '#e67e22', '#2c3e50'];
+        
+        const monthOrderList = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        function sortMonthsChronologically(months) {
+            return months.sort((a, b) => {
+                const partsA = a.split(' ');
+                const partsB = b.split(' ');
+                const yearA = parseInt(partsA[1]);
+                const yearB = parseInt(partsB[1]);
+                if (yearA !== yearB) return yearA - yearB;
+                return monthOrderList.indexOf(partsA[0]) - monthOrderList.indexOf(partsB[0]);
+            });
+        }
+
+        function setStatus(msg) {
+            document.getElementById('status').textContent = msg;
+        }
+
+        async function processFile() {
+            if (!selectedFile) {
+                setStatus('Please select a CSV file.');
+                return;
+            }
+
+            setStatus('Loading data...');
+            
+            const text = await selectedFile.text();
+            
+            // Detect delimiter (semicolon or comma)
+            const firstLine = text.split('\n')[0];
+            const delimiter = firstLine.includes(';') ? ';' : ',';
+            
+            Papa.parse(text, {
+                header: true,
+                delimiter: delimiter,
+                skipEmptyLines: true,
+                quoteChar: '', // Disable quote handling to prevent issues with unescaped quotes in content
+                complete: function(results) {
+                    processData(results.data);
+                },
+                error: function(err) {
+                    setStatus('Error parsing CSV: ' + err.message);
+                }
+            });
+        }
+
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            
+            // Try standard Date parsing first
+            let parsedDate = new Date(dateStr);
+            if (!isNaN(parsedDate.getTime())) return parsedDate;
+            
+            // Try manual parsing for various formats
+            // Format: 2025-04-01T07:04:48.084487+00:00
+            const isoMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
+            if (isoMatch) {
+                return new Date(isoMatch[1], isoMatch[2] - 1, isoMatch[3], isoMatch[4], isoMatch[5], isoMatch[6]);
+            }
+            
+            // Format: 2025-04-01
+            const dateOnlyMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (dateOnlyMatch) {
+                return new Date(dateOnlyMatch[1], dateOnlyMatch[2] - 1, dateOnlyMatch[3]);
+            }
+            
+            return null;
+        }
+
+        function processData(data) {
+            // Build conversations from CSV data
+            const conversations = {};
+            
+            // Check if this is the wide format (message1, messageagent1, etc.) or row format (Role, Content)
+            const firstRow = data[0] || {};
+            const isWideFormat = 'message1' in firstRow || 'messageagent1' in firstRow;
+            
+            if (isWideFormat) {
+                // Wide format: each row is a conversation with message1, messageagent1, message2, etc.
+                data.forEach(row => {
+                    const convId = row['conversationId'] || row['Conversation ID'];
+                    if (!convId) return;
+                    
+                    const dateStr = row['messageTime'] || row['Message Time'];
+                    const parsedDate = parseDate(dateStr);
+                    
+                    const category = row['category'] || row['Category'] || 'General support';
+                    const pairs = [];
+                    
+                    // Extract message pairs (message1/messageagent1, message2/messageagent2, etc.)
+                    for (let i = 1; i <= 35; i++) {
+                        const userMsg = row[`message${i}`];
+                        const agentMsg = row[`messageagent${i}`];
+                        
+                        if (userMsg && userMsg.trim()) {
+                            pairs.push({
+                                content: userMsg,
+                                agentContent: agentMsg || '',
+                                _parsedDate: parsedDate,
+                                role: 'user',
+                                category: category
+                            });
+                        }
+                    }
+                    
+                    if (pairs.length > 0) {
+                        conversations[convId] = {
+                            pairs: pairs,
+                            category: category,
+                            messageTime: dateStr
+                        };
+                    }
+                });
+            } else {
+                // Row format: each row is a message with Role and Content columns
+                data.forEach(row => {
+                    const convId = row['Conversation ID'] || row['conversationId'];
+                    if (!convId) return;
+                    
+                    if (!conversations[convId]) {
+                        conversations[convId] = {
+                            pairs: [],
+                            category: row['Category'] || row['category'] || 'General support',
+                            messageTime: row['Message Time'] || row['messageTime']
+                        };
+                    }
+                    
+                    const dateStr = row['Message Time'] || row['messageTime'];
+                    const parsedDate = parseDate(dateStr);
+                    
+                    const role = row['Role'] || row['role'];
+                    const content = row['Content'] || row['content'];
+                    
+                    if (role === 'user') {
+                        conversations[convId].pairs.push({
+                            content: content,
+                            agentContent: '',
+                            _parsedDate: parsedDate,
+                            role: 'user',
+                            category: conversations[convId].category
+                        });
+                    } else if (role === 'agent' || role === 'assistant') {
+                        const pairs = conversations[convId].pairs;
+                        if (pairs.length > 0) {
+                            pairs[pairs.length - 1].agentContent = content;
+                        }
+                    }
+                });
+            }
+
+            // Store for modal
+            allConversationsData = conversations;
+
+            // Convert to flat array for stats
+            const flatData = [];
+            for (const [convId, convo] of Object.entries(conversations)) {
+                convo.pairs.forEach(pair => {
+                    if (pair.content) {
+                        flatData.push({
+                            conversationId: convId,
+                            role: 'user',
+                            content: pair.content,
+                            category: convo.category,
+                            _parsedDate: pair._parsedDate
+                        });
+                    }
+                });
+            }
+
+            // Store all data for filtering
+            allFlatData = flatData;
+            
+            // Apply filters if set
+            const filteredData = applyFilters(flatData);
+
+            const stats = calculateStats(filteredData);
+            currentStats = stats;
+            
+            document.getElementById('dashboard').style.display = 'grid';
+            document.getElementById('filterBtn').style.display = 'none';
+            document.getElementById('clearFilterBtn').style.display = document.getElementById('startDate').value ? 'inline-block' : 'none';
+            displayStats(stats);
+            
+            updateStatusText(filteredData.length);
+        }
+        
+        function applyFilters(data) {
+            let result = data;
+            
+            // Date filter
+            const startDateStr = document.getElementById('startDate').value;
+            if (startDateStr) {
+                const startDate = new Date(startDateStr);
+                startDate.setHours(0, 0, 0, 0);
+                
+                result = result.filter(row => {
+                    if (!row._parsedDate) return false;
+                    return row._parsedDate >= startDate;
+                });
+            }
+            
+            // Search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (searchTerm) {
+                result = result.filter(row => {
+                    return row.content && row.content.toLowerCase().includes(searchTerm);
+                });
+                document.getElementById('clearSearchBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('clearSearchBtn').style.display = 'none';
+            }
+            
+            return result;
+        }
+        
+        function updateStatusText(count) {
+            const startDateStr = document.getElementById('startDate').value;
+            const searchTerm = document.getElementById('searchInput').value;
+            let status = `Showing ${count} questions`;
+            
+            if (startDateStr) status += ` from ${startDateStr}`;
+            if (searchTerm) status += ` matching "${searchTerm}"`;
+            
+            setStatus(status + '.');
+        }
+        
+        function applyDateFilter() {
+            if (allFlatData.length === 0) {
+                setStatus('Please load a CSV file first.');
+                return;
+            }
+            
+            const filteredData = applyFilters(allFlatData);
+            const stats = calculateStats(filteredData);
+            currentStats = stats;
+            
+            displayStats(stats);
+            document.getElementById('filterBtn').style.display = 'none';
+            document.getElementById('clearFilterBtn').style.display = 'inline-block';
+            
+            updateStatusText(filteredData.length);
+        }
+        
+        function clearDateFilter() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('filterBtn').style.display = 'none';
+            document.getElementById('clearFilterBtn').style.display = 'none';
+            
+            refreshDashboard();
+        }
+        
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                applySearch();
+            }
+        }
+        
+        function applySearch() {
+            if (allFlatData.length === 0) return;
+            
+            const filteredData = applyFilters(allFlatData);
+            const stats = calculateStats(filteredData);
+            currentStats = stats;
+            displayStats(stats);
+            
+            updateStatusText(filteredData.length);
+        }
+        
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            refreshDashboard();
+        }
+        
+        function refreshDashboard() {
+            if (allFlatData.length > 0) {
+                const filteredData = applyFilters(allFlatData);
+                const stats = calculateStats(filteredData);
+                currentStats = stats;
+                displayStats(stats);
+                updateStatusText(filteredData.length);
+            }
+        }
+
+        function calculateStats(data) {
+            const totalConversations = new Set(data.map((row) => row.conversationId)).size;
+            const totalQuestions = data.filter((row) => row.role === 'user').length;
+            const questionsByMonth = {};
+            const questionsByWeekday = {};
+            const timeOfDay = { office: 0, evening: 0, night: 0 };
+            const questionsByCategory = {};
+            const questionsByCategoryByMonth = {};
+            const timeOfDayByMonth = {};
+            const weekdaysByMonth = {};
+
+            data.forEach((row) => {
+                if (row.role !== 'user' || !row._parsedDate) return;
+                const date = row._parsedDate;
+                const month = date.toLocaleString('en', { month: 'long', year: 'numeric' });
+                const weekday = date.toLocaleString('en', { weekday: 'long' });
+                const hour = date.getHours();
+                const category = row.category || 'General support';
+
+                questionsByMonth[month] = (questionsByMonth[month] || 0) + 1;
+                if (!questionsByWeekday[month]) {
+                    questionsByWeekday[month] = {};
+                }
+                questionsByWeekday[month][weekday] = (questionsByWeekday[month][weekday] || 0) + 1;
+                questionsByCategory[category] = (questionsByCategory[category] || 0) + 1;
+
+                if (!questionsByCategoryByMonth[month]) {
+                    questionsByCategoryByMonth[month] = {};
+                }
+                questionsByCategoryByMonth[month][category] = (questionsByCategoryByMonth[month][category] || 0) + 1;
+
+                if (!timeOfDayByMonth[month]) {
+                    timeOfDayByMonth[month] = { office: 0, evening: 0, night: 0 };
+                }
+                if (hour >= 8 && hour < 16) {
+                    timeOfDay.office++;
+                    timeOfDayByMonth[month].office++;
+                } else if (hour >= 16 && hour < 22) {
+                    timeOfDay.evening++;
+                    timeOfDayByMonth[month].evening++;
+                } else {
+                    timeOfDay.night++;
+                    timeOfDayByMonth[month].night++;
+                }
+
+                if (!weekdaysByMonth[month]) {
+                    weekdaysByMonth[month] = {};
+                }
+                weekdaysByMonth[month][weekday] = (weekdaysByMonth[month][weekday] || 0) + 1;
+            });
+            return { totalConversations, totalQuestions, questionsByMonth, questionsByWeekday, timeOfDay, questionsByCategory, questionsByCategoryByMonth, timeOfDayByMonth, weekdaysByMonth };
+        }
+
+        function displayStats(stats) {
+            charts.forEach((c) => c.destroy());
+            charts = [];
+            document.getElementById('totalConversations').textContent = stats.totalConversations;
+            document.getElementById('totalQuestions').textContent = stats.totalQuestions;
+
+            // Sort months chronologically
+            const sortedMonths = sortMonthsChronologically(Object.keys(stats.questionsByMonth));
+
+            const timeCtx = document.getElementById('timeChart').getContext('2d');
+            const timeChart = new Chart(timeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Office Hours (08-16)', 'Evening (16-22)', 'Night (22-08)'],
+                    datasets: [{
+                        data: [stats.timeOfDay.office, stats.timeOfDay.evening, stats.timeOfDay.night],
+                        backgroundColor: ['#3498db', '#e67e22', '#2c3e50'],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: 2,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                        title: { display: true, text: 'Time of Day', font: { size: 14, family: 'Roboto', weight: '500', color: '#2c3e50' } },
+                    },
+                    layout: { padding: 10 },
+                },
+            });
+            charts.push(timeChart);
+
+            const monthCtx = document.getElementById('monthChart').getContext('2d');
+            const monthChart = new Chart(monthCtx, {
+                type: 'bar',
+                data: {
+                    labels: sortedMonths,
+                    datasets: [{
+                        label: 'Questions',
+                        data: sortedMonths.map(month => stats.questionsByMonth[month]),
+                        backgroundColor: '#3498db',
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        borderColor: '#fff',
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: 2,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                        x: { ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Questions per Month', font: { size: 14, family: 'Roboto', weight: '500', color: '#2c3e50' } },
+                    },
+                    elements: { bar: { borderWidth: 1, borderRadius: 5 } },
+                },
+            });
+            charts.push(monthChart);
+
+            // Create trend charts
+            createTrendChart(stats, sortedMonths);
+            createTimeTrendChart(stats, sortedMonths);
+            createWeekdayTrendChart(stats, sortedMonths);
+
+            const weekdayChartsDiv = document.getElementById('weekdayCharts');
+            weekdayChartsDiv.innerHTML = '';
+            const weekdayColors = { Monday: '#3498db', Tuesday: '#e67e22', Wednesday: '#2c3e50', Thursday: '#27ae60', Friday: '#8e44ad', Saturday: '#e74c3c', Sunday: '#f1c40f' };
+            const categoryOrder = categoryList;
+
+            sortedMonths.forEach((month) => {
+                const weekdays = stats.questionsByWeekday[month];
+                if (!weekdays) return;
+                
+                const weekdayCard = document.createElement('div');
+                weekdayCard.className = 'month-row card';
+                const weekdayCanvas = document.createElement('canvas');
+                weekdayCanvas.id = `weekdayChart_${month.replace(/\s+/g, '_')}`;
+                weekdayCard.appendChild(weekdayCanvas);
+                weekdayChartsDiv.appendChild(weekdayCard);
+
+                const weekdayData = {};
+                weekdaysOrder.forEach((day) => {
+                    weekdayData[day] = weekdays[day] || 0;
+                });
+                const wdCtx = weekdayCanvas.getContext('2d');
+                const wdChart = new Chart(wdCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: weekdaysOrder,
+                        datasets: [{
+                            label: 'Questions',
+                            data: weekdaysOrder.map((day) => weekdayData[day]),
+                            backgroundColor: weekdaysOrder.map((day) => weekdayColors[day]),
+                            borderRadius: 5,
+                            borderWidth: 1,
+                            borderColor: '#fff',
+                        }],
+                    },
+                    options: {
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const weekday = weekdaysOrder[index];
+                                openWeekdayModal(weekday, month);
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                            x: { ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: `Weekdays - ${month} (click to view)`, font: { size: 14, family: 'Roboto', weight: '500', color: '#2c3e50' } },
+                            tooltip: {
+                                callbacks: {
+                                    footer: () => 'Click to view conversations'
+                                }
+                            }
+                        },
+                        maintainAspectRatio: false,
+                        elements: { bar: { borderWidth: 1, borderRadius: 5 } },
+                        onHover: (event, elements) => {
+                            event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                        }
+                    },
+                });
+                charts.push(wdChart);
+
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'month-row card';
+                const categoryCanvas = document.createElement('canvas');
+                categoryCanvas.id = `categoryChart_${month.replace(/\s+/g, '_')}`;
+                categoryCard.appendChild(categoryCanvas);
+                weekdayChartsDiv.appendChild(categoryCard);
+
+                const categoryData = stats.questionsByCategoryByMonth[month] || {};
+                const catCtx = categoryCanvas.getContext('2d');
+                const catChart = new Chart(catCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: categoryOrder,
+                        datasets: [{
+                            label: 'Questions',
+                            data: categoryOrder.map((cat) => categoryData[cat] || 0),
+                            backgroundColor: categoryOrder.map((cat) => categoryColors[cat]),
+                            borderRadius: 5,
+                            borderWidth: 1,
+                            borderColor: '#fff',
+                        }],
+                    },
+                    options: {
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const category = categoryOrder[index];
+                                openCategoryModal(category, month);
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                            x: { ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: `Categories - ${month} (click to view)`, font: { size: 14, family: 'Roboto', weight: '500', color: '#2c3e50' } },
+                            tooltip: {
+                                callbacks: {
+                                    footer: () => 'Click to view conversations'
+                                }
+                            }
+                        },
+                        maintainAspectRatio: false,
+                        elements: { bar: { borderWidth: 1, borderRadius: 5 } },
+                        onHover: (event, elements) => {
+                            event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                        }
+                    },
+                });
+                charts.push(catChart);
+            });
+        }
+
+        // Trend chart functions
+        function createTrendChart(stats, sortedMonths) {
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            const monthTotals = {};
+            sortedMonths.forEach(month => {
+                const categoryData = stats.questionsByCategoryByMonth[month] || {};
+                monthTotals[month] = categoryList.reduce((sum, cat) => sum + (categoryData[cat] || 0), 0);
+            });
+            
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const datasets = categoryList.map(category => ({
+                label: category,
+                data: sortedMonths.map(month => {
+                    const categoryData = stats.questionsByCategoryByMonth[month] || {};
+                    const value = categoryData[category] || 0;
+                    const total = monthTotals[month] || 1;
+                    return Math.round((value / total) * 1000) / 10;
+                }),
+                borderColor: categoryColors[category],
+                backgroundColor: categoryColors[category] + '80',
+                fill: currentTrendType === 'stacked',
+                tension: 0.3,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }));
+
+            const chartConfig = {
+                type: currentTrendType === 'line' ? 'line' : 'bar',
+                data: { labels: sortedMonths, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: currentTrendType === 'stacked' ? 100 : undefined,
+                            stacked: currentTrendType === 'stacked',
+                            ticks: { font: { size: 10, family: 'Roboto' }, color: '#333', callback: v => v + '%' } 
+                        },
+                        x: { stacked: currentTrendType === 'stacked', ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11, family: 'Roboto' }, color: '#333', usePointStyle: true, padding: 15 } },
+                        title: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const label = ctx.dataset.label || '';
+                                    const value = ctx.raw || 0;
+                                    const month = sortedMonths[ctx.dataIndex];
+                                    const categoryData = stats.questionsByCategoryByMonth[month] || {};
+                                    return `${label}: ${value}% (${categoryData[label] || 0} frågor)`;
+                                },
+                                footer: items => `Totalt: ${monthTotals[sortedMonths[items[0].dataIndex]]} frågor`
+                            }
+                        }
+                    },
+                },
+            };
+            trendChart = new Chart(trendCtx, chartConfig);
+        }
+
+        function setTrendChartType(type) {
+            currentTrendType = type;
+            document.getElementById('trendLineBtn').classList.remove('active');
+            document.getElementById('trendStackedBtn').classList.remove('active');
+            document.getElementById('trendGroupedBtn').classList.remove('active');
+            document.getElementById(`trend${type.charAt(0).toUpperCase() + type.slice(1)}Btn`).classList.add('active');
+            if (currentStats) {
+                const sortedMonths = sortMonthsChronologically(Object.keys(currentStats.questionsByMonth));
+                createTrendChart(currentStats, sortedMonths);
+            }
+        }
+
+        function createTimeTrendChart(stats, sortedMonths) {
+            if (timeTrendChart) timeTrendChart.destroy();
+            
+            const monthTotals = {};
+            sortedMonths.forEach(month => {
+                const timeData = stats.timeOfDayByMonth[month] || { office: 0, evening: 0, night: 0 };
+                monthTotals[month] = timeData.office + timeData.evening + timeData.night;
+            });
+            
+            const trendCtx = document.getElementById('timeTrendChart').getContext('2d');
+            const datasets = timeOfDayKeys.map((key, idx) => ({
+                label: timeOfDayLabels[idx],
+                data: sortedMonths.map(month => {
+                    const timeData = stats.timeOfDayByMonth[month] || { office: 0, evening: 0, night: 0 };
+                    const value = timeData[key] || 0;
+                    const total = monthTotals[month] || 1;
+                    return Math.round((value / total) * 1000) / 10;
+                }),
+                borderColor: timeOfDayColors[idx],
+                backgroundColor: timeOfDayColors[idx] + '80',
+                fill: currentTimeTrendType === 'stacked',
+                tension: 0.3, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+            }));
+
+            timeTrendChart = new Chart(trendCtx, {
+                type: currentTimeTrendType === 'line' ? 'line' : 'bar',
+                data: { labels: sortedMonths, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { beginAtZero: true, max: currentTimeTrendType === 'stacked' ? 100 : undefined, stacked: currentTimeTrendType === 'stacked', ticks: { font: { size: 10, family: 'Roboto' }, color: '#333', callback: v => v + '%' } },
+                        x: { stacked: currentTimeTrendType === 'stacked', ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11, family: 'Roboto' }, color: '#333', usePointStyle: true, padding: 15 } },
+                        title: { display: false },
+                        tooltip: { callbacks: {
+                            label: ctx => { const l = ctx.dataset.label, v = ctx.raw, m = sortedMonths[ctx.dataIndex], td = stats.timeOfDayByMonth[m] || {}, ki = timeOfDayLabels.indexOf(l); return `${l}: ${v}% (${td[timeOfDayKeys[ki]] || 0} frågor)`; },
+                            footer: items => `Totalt: ${monthTotals[sortedMonths[items[0].dataIndex]]} frågor`
+                        }}
+                    },
+                },
+            });
+        }
+
+        function setTimeTrendChartType(type) {
+            currentTimeTrendType = type;
+            document.getElementById('timeLineBtn').classList.remove('active');
+            document.getElementById('timeStackedBtn').classList.remove('active');
+            document.getElementById('timeGroupedBtn').classList.remove('active');
+            document.getElementById(`time${type.charAt(0).toUpperCase() + type.slice(1)}Btn`).classList.add('active');
+            if (currentStats) {
+                const sortedMonths = sortMonthsChronologically(Object.keys(currentStats.questionsByMonth));
+                createTimeTrendChart(currentStats, sortedMonths);
+            }
+        }
+
+        function createWeekdayTrendChart(stats, sortedMonths) {
+            if (weekdayTrendChart) weekdayTrendChart.destroy();
+            
+            const monthTotals = {};
+            sortedMonths.forEach(month => {
+                const weekdayData = stats.weekdaysByMonth[month] || {};
+                monthTotals[month] = weekdaysOrder.reduce((sum, day) => sum + (weekdayData[day] || 0), 0);
+            });
+            
+            const trendCtx = document.getElementById('weekdayTrendChart').getContext('2d');
+            const datasets = weekdaysOrder.map(day => ({
+                label: day,
+                data: sortedMonths.map(month => {
+                    const weekdayData = stats.weekdaysByMonth[month] || {};
+                    const value = weekdayData[day] || 0;
+                    const total = monthTotals[month] || 1;
+                    return Math.round((value / total) * 1000) / 10;
+                }),
+                borderColor: weekdayColorsMap[day],
+                backgroundColor: weekdayColorsMap[day] + '80',
+                fill: currentWeekdayTrendType === 'stacked',
+                tension: 0.3, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+            }));
+
+            weekdayTrendChart = new Chart(trendCtx, {
+                type: currentWeekdayTrendType === 'line' ? 'line' : 'bar',
+                data: { labels: sortedMonths, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { beginAtZero: true, max: currentWeekdayTrendType === 'stacked' ? 100 : undefined, stacked: currentWeekdayTrendType === 'stacked', ticks: { font: { size: 10, family: 'Roboto' }, color: '#333', callback: v => v + '%' } },
+                        x: { stacked: currentWeekdayTrendType === 'stacked', ticks: { font: { size: 10, family: 'Roboto' }, color: '#333' } },
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11, family: 'Roboto' }, color: '#333', usePointStyle: true, padding: 15 } },
+                        title: { display: false },
+                        tooltip: { callbacks: {
+                            label: ctx => { const l = ctx.dataset.label, v = ctx.raw, m = sortedMonths[ctx.dataIndex], wd = stats.weekdaysByMonth[m] || {}; return `${l}: ${v}% (${wd[l] || 0} frågor)`; },
+                            footer: items => `Totalt: ${monthTotals[sortedMonths[items[0].dataIndex]]} frågor`
+                        }}
+                    },
+                },
+            });
+        }
+
+        function setWeekdayTrendChartType(type) {
+            currentWeekdayTrendType = type;
+            document.getElementById('weekdayLineBtn').classList.remove('active');
+            document.getElementById('weekdayStackedBtn').classList.remove('active');
+            document.getElementById('weekdayGroupedBtn').classList.remove('active');
+            document.getElementById(`weekday${type.charAt(0).toUpperCase() + type.slice(1)}Btn`).classList.add('active');
+            if (currentStats) {
+                const sortedMonths = sortMonthsChronologically(Object.keys(currentStats.questionsByMonth));
+                createWeekdayTrendChart(currentStats, sortedMonths);
+            }
+        }
+
+        function openWeekdayModal(weekday, month) {
+            const modal = document.getElementById('conversationModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${weekday} - ${month}`;
+            
+            const monthParts = month.split(' ');
+            const monthIndex = monthOrderList.indexOf(monthParts[0]);
+            const year = parseInt(monthParts[1]);
+            
+            const monthStart = new Date(year, monthIndex, 1);
+            const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59);
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filteredConversations = [];
+            let totalQuestions = 0;
+            
+            for (const [convId, convo] of Object.entries(allConversationsData)) {
+                const relevantPairs = convo.pairs.filter(pair => {
+                    if (!pair._parsedDate) return false;
+                    // Check if date is within the month
+                    if (pair._parsedDate < monthStart || pair._parsedDate > monthEnd) return false;
+                    
+                    // Check if weekday matches
+                    const dayName = pair._parsedDate.toLocaleString('en', { weekday: 'long' });
+                    if (dayName !== weekday) return false;
+                    
+                    // Check search term
+                    if (searchTerm && (!pair.content || !pair.content.toLowerCase().includes(searchTerm))) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                if (relevantPairs.length > 0) {
+                    filteredConversations.push({ id: convId, messageTime: convo.messageTime, pairs: relevantPairs });
+                    totalQuestions += relevantPairs.filter(p => p.content && p.content.trim()).length;
+                }
+            }
+            
+            let html = `<div class="modal-stats">
+                <div class="modal-stat"><div class="modal-stat-value">${filteredConversations.length}</div><div class="modal-stat-label">Conversations</div></div>
+                <div class="modal-stat"><div class="modal-stat-value">${totalQuestions}</div><div class="modal-stat-label">Questions</div></div>
+            </div>`;
+            
+            if (filteredConversations.length === 0) {
+                html += '<div class="no-data">No conversations found for this day.</div>';
+            } else {
+                filteredConversations.forEach(convo => {
+                    html += `<div class="conversation-item">
+                        <div class="conversation-header">
+                            <span><strong>Conversation ID:</strong> ${convo.id.substring(0, 8)}...</span>
+                            <span><strong>Date:</strong> ${convo.messageTime}</span>
+                        </div>`;
+                    
+                    convo.pairs.forEach((pair, index) => {
+                        html += `<div class="qa-pair">
+                            <div class="question">
+                                <div class="question-label">Question ${index + 1}</div>
+                                ${pair.content}
+                            </div>
+                            <div class="answer">
+                                <div class="answer-label">Answer</div>
+                                ${pair.agentContent || '<i>No response</i>'}
+                            </div>
+                        </div>`;
+                    });
+                    
+                    html += `</div>`;
+                });
+            }
+            
+            modalBody.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        // Modal functions
+        function openCategoryModal(category, month) {
+            const modal = document.getElementById('conversationModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${category} - ${month}`;
+            
+            const monthDate = new Date(month);
+            const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+            const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59);
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filteredConversations = [];
+            let totalQuestions = 0;
+            
+            for (const [convId, convo] of Object.entries(allConversationsData)) {
+                if (convo.category !== category) continue;
+                
+                const relevantPairs = convo.pairs.filter(pair => {
+                    if (!pair._parsedDate) return false;
+                    if (pair._parsedDate < monthStart || pair._parsedDate > monthEnd) return false;
+                    
+                    // Check search term
+                    if (searchTerm && (!pair.content || !pair.content.toLowerCase().includes(searchTerm))) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                if (relevantPairs.length > 0) {
+                    filteredConversations.push({ id: convId, messageTime: convo.messageTime, pairs: relevantPairs });
+                    totalQuestions += relevantPairs.filter(p => p.content && p.content.trim()).length;
+                }
+            }
+            
+            let html = `<div class="modal-stats">
+                <div class="modal-stat"><div class="modal-stat-value">${filteredConversations.length}</div><div class="modal-stat-label">Conversations</div></div>
+                <div class="modal-stat"><div class="modal-stat-value">${totalQuestions}</div><div class="modal-stat-label">Questions</div></div>
+            </div>`;
+            
+            if (filteredConversations.length === 0) {
+                html += '<div class="no-data">No conversations found for this category and time period.</div>';
+            } else {
+                filteredConversations.sort((a, b) => new Date(b.messageTime) - new Date(a.messageTime));
+                
+                filteredConversations.forEach(convo => {
+                    const date = new Date(convo.messageTime);
+                    const formattedDate = date.toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    
+                    html += `<div class="conversation-item"><div class="conversation-header"><strong>Conversation ID:</strong> ${convo.id.substring(0, 8)}... | <strong>Date:</strong> ${formattedDate}</div>`;
+                    
+                    convo.pairs.forEach((pair, idx) => {
+                        if (pair.content || pair.agentContent) {
+                            html += `<div class="qa-pair">`;
+                            if (pair.content && pair.content.trim()) {
+                                html += `<div class="question"><div class="question-label">Question ${idx + 1}</div>${escapeHtml(pair.content)}</div>`;
+                            }
+                            if (pair.agentContent && pair.agentContent.trim()) {
+                                html += `<div class="answer"><div class="answer-label">Answer</div>${escapeHtml(pair.agentContent)}</div>`;
+                            }
+                            html += `</div>`;
+                        }
+                    });
+                    html += `</div>`;
+                });
+            }
+            
+            modalBody.innerHTML = html;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('conversationModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function closeModalOnOverlay(event) {
+            if (event.target === event.currentTarget) closeModal();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    </script>
+</body>
+</html>
