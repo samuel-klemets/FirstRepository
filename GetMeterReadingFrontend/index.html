@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>Meter search</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: "Raleway", sans-serif;
+      }
+      body {
+        background: rgb(255, 179, 57);
+        background: linear-gradient(
+          90deg,
+          rgba(255, 179, 57, 1) 0%,
+          rgba(255, 152, 100, 1) 50%,
+          rgba(255, 179, 57, 1) 100%
+        );
+        display: flex;
+        justify-content: center;
+        margin: 100px 0 100px;
+        text-align: center;
+      }
+      .container {
+        background: rgb(255, 255, 255);
+        padding: 100px;
+        box-shadow: 0px 0px 60px rgb(0, 0, 0);
+        border-radius: 10px;
+        min-height: 320px;
+        margin: 20px;
+      }
+      h1 {
+        font-size: 40px;
+      }
+      p {
+        font-size: 20px;
+        margin: 10px;
+      }
+      #numberInput {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid black;
+        font-size: 18px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .status {
+        margin-top: 20px;
+      }
+      #statusMessage {
+        font-size: 20px;
+      }
+
+      .elements {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 179, 57, 1) 0%,
+          rgba(255, 152, 100, 1) 50%,
+          rgba(255, 179, 57, 1) 100%
+        );
+        font-size: 20px;
+        padding: 8px 16px 8px;
+        border: none;
+        margin: 20px 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .elements:hover {
+        background: linear-gradient(
+          90deg,
+          rgb(255, 157, 0) 0%,
+          rgb(228, 80, 7) 50%,
+          rgb(255, 157, 0) 100%
+        );
+      }
+
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        text-align: left;
+        background: #fff;
+      }
+      .card h3 {
+        margin-bottom: 10px;
+      }
+      .error-card {
+        border-color: #ffb3b3;
+        background: #fff7f7;
+      }
+      .error-row {
+        margin: 6px 0;
+        font-size: 18px;
+      }
+      .error-label {
+        font-weight: 700;
+      }
+
+      .api-config {
+        margin-top: 15px;
+      }
+      #apiUrlInput {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid black;
+        font-size: 16px;
+        width: 340px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .api-config button {
+        font-size: 16px;
+        padding: 6px 12px;
+        margin: 10px 5px;
+      }
+
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Meter search</h1>
+      <br />
+      <p>Hämta data från mätare.</p>
+      <p>
+        Ange en mätarnummer eller förbrukningsplatsnummer i fältet nedanför och
+        tryck sedan på skicka.
+      </p>
+      <input type="number" id="numberInput" placeholder="Mätarnummer" />
+      <button onclick="sendNumber()" class="elements">Skicka</button>
+
+      <div class="api-config">
+        <p style="font-size: 16px; margin: 5px;">Backend API URL:</p>
+        <input type="text" id="apiUrlInput" placeholder="http://localhost:3000" />
+        <button onclick="saveApiUrl()" class="elements">Spara URL</button>
+      </div>
+
+      <div class="status">
+        <p id="statusMessage"></p>
+        <br /><br />
+        <div id="responseBody"></div>
+      </div>
+    </div>
+
+    <script>
+      (function init() {
+        var saved = localStorage.getItem('apiBaseUrl');
+        if (saved) {
+          document.getElementById('apiUrlInput').value = saved;
+        } else {
+          document.getElementById('apiUrlInput').value = 'http://localhost:3000';
+        }
+      })();
+
+      function getApiBaseUrl() {
+        var url = document.getElementById('apiUrlInput').value.trim();
+        if (!url) url = 'http://localhost:3000';
+        return url.replace(/\/$/, '');
+      }
+
+      function saveApiUrl() {
+        var url = document.getElementById('apiUrlInput').value.trim();
+        if (!url) url = 'http://localhost:3000';
+        localStorage.setItem('apiBaseUrl', url);
+        alert('API URL sparad: ' + url);
+      }
+
+      function sendNumber() {
+        var number = document.getElementById("numberInput").value;
+        var statusMessage = document.getElementById("statusMessage");
+        var responseBody = document.getElementById("responseBody");
+
+        statusMessage.innerText = "";
+        responseBody.innerHTML = "";
+
+        if (!validateNumber(number)) {
+          statusMessage.innerText = "Inkorrekt mätarnummer. Försök igen.";
+          statusMessage.style.color = "red";
+          return;
+        }
+
+        var baseUrl = getApiBaseUrl();
+        var url = baseUrl + "/Kamstrup/RequestDataFromMeter";
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        statusMessage.innerText = "Väntar på svar...";
+        statusMessage.style.color = "black";
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState !== 4) return;
+
+          if (xhr.status === 200) {
+            statusMessage.innerText = "Processen lyckades.";
+            statusMessage.style.color = "green";
+
+            try {
+              var response = JSON.parse(xhr.responseText);
+              displayResponse(response);
+            } catch (e) {
+              statusMessage.innerText =
+                "Processen lyckades, men svaret kunde inte tolkas som JSON.";
+              statusMessage.style.color = "orange";
+
+              responseBody.innerHTML =
+                '<div class="card"><h3>Rått svar</h3><pre style="white-space:pre-wrap;">' +
+                escapeHtml(xhr.responseText || "") +
+                "</pre></div>";
+            }
+          } else {
+            statusMessage.innerText = "Processen misslyckades (" + xhr.status + ").";
+            statusMessage.style.color = "red";
+
+            renderError(xhr.status, xhr.responseText);
+          }
+        };
+
+        xhr.onerror = function () {
+          statusMessage.innerText =
+            "Nätverksfel: kunde inte nå servern (ingen HTTP-status).";
+          statusMessage.style.color = "red";
+
+          responseBody.innerHTML =
+            '<div class="card error-card"><h3>Nätverksfel</h3><p>Kontrollera nätverk, CORS eller serverstatus.</p></div>';
+        };
+
+        var data = JSON.stringify({ number: number });
+        xhr.send(data);
+      }
+
+      function validateNumber(number) {
+        return (
+          (number.length === 8 || number.length === 7 || number.length === 6)
+        );
+      }
+
+      function renderError(statusCode, responseText) {
+        var responseBody = document.getElementById("responseBody");
+        responseBody.innerHTML = "";
+
+        var parsed = null;
+        try {
+          parsed = JSON.parse(responseText);
+        } catch (e) {
+          parsed = null;
+        }
+
+        var card = document.createElement("div");
+        card.className = "card error-card";
+
+        var title = document.createElement("h3");
+        title.innerText = "Fel (" + statusCode + ")";
+        card.appendChild(title);
+
+        var formattedLines = formatErrorResponse(parsed, responseText);
+
+        formattedLines.forEach(function (line) {
+          var row = document.createElement("div");
+          row.className = "error-row";
+
+          if (line.label) {
+            var label = document.createElement("span");
+            label.className = "error-label";
+            label.innerText = line.label + ": ";
+            row.appendChild(label);
+          }
+
+          var value = document.createElement("span");
+          value.innerText = line.value;
+          row.appendChild(value);
+
+          card.appendChild(row);
+        });
+
+        responseBody.appendChild(card);
+      }
+
+      function formatErrorResponse(parsedJson, rawText) {
+        var lines = [];
+
+        if (Array.isArray(parsedJson)) {
+          if (parsedJson.length === 0) {
+            lines.push({ label: "Meddelande", value: "Tomt fel-svar (array)." });
+            return lines;
+          }
+
+          parsedJson.forEach(function (item, idx) {
+            if (item && typeof item === "object") {
+              lines.push({ label: "Fel " + (idx + 1), value: "" });
+
+              if (item.Code !== undefined) lines.push({ label: "Kod", value: String(item.Code) });
+              if (item.Level !== undefined) lines.push({ label: "Nivå", value: String(item.Level) });
+              if (item.Reason !== undefined) lines.push({ label: "Orsak", value: String(item.Reason) });
+
+              Object.keys(item).forEach(function (k) {
+                if (k === "Code" || k === "Level" || k === "Reason") return;
+                lines.push({ label: k, value: String(item[k]) });
+              });
+
+              if (idx < parsedJson.length - 1) {
+                lines.push({ label: "", value: "—" });
+              }
+            } else {
+              lines.push({ label: "Fel " + (idx + 1), value: String(item) });
+            }
+          });
+
+          return lines;
+        }
+
+        if (parsedJson && typeof parsedJson === "object") {
+          if (parsedJson.message) lines.push({ label: "Meddelande", value: String(parsedJson.message) });
+          if (parsedJson.error) lines.push({ label: "Error", value: String(parsedJson.error) });
+          if (parsedJson.reason) lines.push({ label: "Orsak", value: String(parsedJson.reason) });
+
+          var gotAny = lines.length > 0;
+          if (!gotAny) {
+            Object.keys(parsedJson).forEach(function (k) {
+              var v = parsedJson[k];
+              lines.push({
+                label: k,
+                value: typeof v === "string" ? v : JSON.stringify(v),
+              });
+            });
+          }
+
+          return lines;
+        }
+
+        var clean = (rawText || "").trim();
+        lines.push({
+          label: "Meddelande",
+          value: clean.length ? clean : "Inget felmeddelande returnerades.",
+        });
+        return lines;
+      }
+
+      function displayResponse(response) {
+        var responseBody = document.getElementById("responseBody");
+        responseBody.innerHTML = "";
+
+        if (!Array.isArray(response)) {
+          responseBody.innerHTML = "<p>Okänt svarformat (förväntade en array).</p>";
+          return;
+        }
+
+        if (response.length === 0) {
+          responseBody.innerHTML = "<p>Inget data returnerades.</p>";
+          return;
+        }
+
+        function addLine(container, label, value, unit) {
+          if (value === undefined || value === null || value === "") return;
+          var p = document.createElement("p");
+          p.innerText = label + ": " + value + (unit ? " " + unit : "");
+          container.appendChild(p);
+        }
+
+        response.forEach(function (meterObj) {
+          var card = document.createElement("div");
+          card.className = "card";
+
+          var title = document.createElement("h3");
+          title.style.marginBottom = "10px";
+          title.innerText = "Mätare: " + (meterObj.Meter ?? "(okänd)");
+          card.appendChild(title);
+
+          addLine(card, "Totaleffekt", meterObj.TotalPower, "W");
+          addLine(card, "Breaker", meterObj.Breaker);
+          addLine(card, "Spänning L1", meterObj.VoltageL1, "V");
+          addLine(card, "Spänning L2", meterObj.VoltageL2, "V");
+          addLine(card, "Spänning L3", meterObj.VoltageL3, "V");
+          addLine(card, "Ström L1", meterObj.CurrentL1, "A");
+          addLine(card, "Ström L2", meterObj.CurrentL2, "A");
+          addLine(card, "Ström L3", meterObj.CurrentL3, "A");
+
+          responseBody.appendChild(card);
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function formatTimestamp(timestamp) {
+        var date = new Date(timestamp);
+        var options = {
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: "Europe/Helsinki",
+        };
+        var formattedDate = new Intl.DateTimeFormat("sv-SE", options).format(date);
+        return formattedDate.replace(",", "");
+      }
+    </script>
+  </body>
+</html>
