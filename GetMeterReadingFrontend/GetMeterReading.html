@@ -10,7 +10,6 @@
 
     <title>Meter search</title>
     <style>
-      /* General body */
       * {
         margin: 0;
         padding: 0;
@@ -37,7 +36,6 @@
         min-height: 320px;
         margin: 20px;
       }
-      /* Texts */
       h1 {
         font-size: 40px;
       }
@@ -59,7 +57,6 @@
         font-size: 20px;
       }
 
-      /* Elements (buttons etc.) */
       .elements {
         background: linear-gradient(
           90deg,
@@ -84,7 +81,6 @@
         );
       }
 
-      /* "Cards" for response / errors */
       .card {
         border: 1px solid #ddd;
         border-radius: 10px;
@@ -108,7 +104,6 @@
         font-weight: 700;
       }
 
-      /* API URL config */
       .api-config {
         margin-top: 15px;
       }
@@ -117,7 +112,7 @@
         border-radius: 5px;
         border: 1px solid black;
         font-size: 16px;
-        width: 280px;
+        width: 340px;
         font-family: Arial, Helvetica, sans-serif;
       }
       .api-config button {
@@ -126,7 +121,6 @@
         margin: 10px 5px;
       }
 
-      /* Fonts */
       @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
     </style>
   </head>
@@ -157,7 +151,6 @@
     </div>
 
     <script>
-      // Load saved API base URL on startup
       (function init() {
         var saved = localStorage.getItem('apiBaseUrl');
         if (saved) {
@@ -170,7 +163,6 @@
       function getApiBaseUrl() {
         var url = document.getElementById('apiUrlInput').value.trim();
         if (!url) url = 'http://localhost:3000';
-        // Remove trailing slash
         return url.replace(/\/$/, '');
       }
 
@@ -186,7 +178,6 @@
         var statusMessage = document.getElementById("statusMessage");
         var responseBody = document.getElementById("responseBody");
 
-        // Clear previous status message and response content
         statusMessage.innerText = "";
         responseBody.innerHTML = "";
 
