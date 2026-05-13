@@ -10,8 +10,395 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<link rel="stylesheet" href="../assets/styles/glass-theme.css?v=3" />
 <style>
+  :root {
+    --glass-shadow:
+      0 2px 0 rgba(255,255,255,1) inset,
+      0 -1px 0 rgba(180,160,130,0.08) inset,
+      1px 0 0 rgba(255,255,255,0.7) inset,
+      -1px 0 0 rgba(255,255,255,0.7) inset,
+      0 4px 16px rgba(120,100,70,0.07),
+      0 16px 48px rgba(120,100,70,0.05),
+      0 1px 3px rgba(120,100,70,0.04);
+    --blur: blur(28px) saturate(2.2) brightness(1.04);
+    --blur-heavy: blur(48px) saturate(2.5) brightness(1.05);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --text-primary: rgba(40,28,16,0.82);
+    --text-secondary: rgba(40,28,16,0.50);
+    --text-tertiary: rgba(40,28,16,0.34);
+  }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(ellipse 90% 70% at 15% 5%, rgba(255,252,245,0.95) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 60% at 85% 95%, rgba(245,238,225,0.55) 0%, transparent 55%),
+      linear-gradient(160deg, #f5f0e8 0%, #f8f4ee 40%, #faf7f2 70%, #fcfaf6 100%) !important;
+    color: rgba(40,28,16,0.82) !important;
+    min-height: 100vh;
+  }
+  body .card, body .panel, body [class*="card"], body [class*="panel"] {
+    background: rgba(255,253,248,0.62) !important;
+    backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    border: 1px solid rgba(255,255,255,0.82) !important;
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow) !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before, .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(150deg, rgba(255,255,255,0.72) 0%, rgba(255,252,245,0.18) 40%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .card > *, .panel > * {
+    position: relative;
+    z-index: 1;
+  }
+  body nav, body .navbar, body header {
+    background: rgba(58,48,36,0.68) !important;
+    backdrop-filter: blur(48px) saturate(2.5) !important;
+    -webkit-backdrop-filter: blur(48px) saturate(2.5) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.09) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.14), 0 4px 24px rgba(0,0,0,0.12) !important;
+    color: #fff !important;
+  }
+  .stat-card {
+    background: rgba(255,253,248,0.62);
+    border: 1px solid rgba(255,255,255,0.82);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+  }
+  .stat-amr {
+    background: rgba(235,245,255,0.55);
+  }
+  .stat-amr .value {
+    color: oklch(48% 0.14 240);
+  }
+  .stat-dms {
+    background: rgba(232,248,245,0.52);
+  }
+  .stat-dms .value {
+    color: oklch(46% 0.13 185);
+  }
+  .stat-man {
+    background: rgba(255,248,228,0.58);
+  }
+  .stat-man .value {
+    color: oklch(50% 0.16 55);
+  }
+  .badge {
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.85);
+  }
+  .badge-dms {
+    background: rgba(220,235,255,0.70);
+    color: oklch(44% 0.14 240);
+  }
+  .badge-amr {
+    background: rgba(210,245,238,0.70);
+    color: oklch(42% 0.13 185);
+  }
+  .badge-man {
+    background: rgba(255,242,210,0.70);
+    color: oklch(46% 0.16 55);
+  }
+  input, select {
+    background: rgba(255,253,248,0.55);
+    border: 1px solid rgba(255,255,255,0.80);
+    border-radius: 20px;
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    box-shadow: 0 2px 8px rgba(120,100,70,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    color: rgba(40,28,16,0.82);
+    outline: none;
+  }
+  input:focus {
+    background: rgba(255,255,255,0.90);
+    box-shadow: 0 0 0 4px rgba(255,245,220,0.45), 0 4px 16px rgba(120,100,70,0.08), inset 0 1px 0 rgba(255,255,255,1);
+    outline: none;
+  }
+  thead th {
+    background: rgba(255,253,248,0.82);
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    border-bottom: 1px solid rgba(255,255,255,0.80);
+    box-shadow: 0 1px 0 rgba(255,255,255,1), 0 2px 8px rgba(120,100,70,0.04);
+    color: rgba(40,28,16,0.32);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(40,28,16,0.04);
+    transition: background 0.15s;
+  }
+  tbody tr:hover {
+    background: rgba(255,255,255,0.72);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(255,255,255,0.6);
+  }
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(40,28,16,0.10);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  body .stat {
+    background: rgba(255,253,248,0.62) !important;
+    border: 1px solid rgba(255,255,255,0.82) !important;
+    border-radius: 10px;
+    backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    box-shadow: 0 2px 0 rgba(255,255,255,1) inset, 0 -1px 0 rgba(180,160,130,0.08) inset, 1px 0 0 rgba(255,255,255,0.7) inset, -1px 0 0 rgba(255,255,255,0.7) inset, 0 4px 16px rgba(120,100,70,0.07) !important;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat:hover {
+    transform: translateY(-2px);
+  }
+  body .stat.amr {
+    background: rgba(235,245,255,0.55) !important;
+  }
+  body .stat.amr .val {
+    color: oklch(48% 0.14 240) !important;
+  }
+  body .stat.dms {
+    background: rgba(232,248,245,0.52) !important;
+  }
+  body .stat.dms .val {
+    color: oklch(46% 0.13 185) !important;
+  }
+  body .stat.man {
+    background: rgba(255,248,228,0.58) !important;
+  }
+  body .stat.man .val {
+    color: oklch(50% 0.16 55) !important;
+  }
+  .stat .val {
+    color: rgba(40,28,16,0.82);
+  }
+  .stat .lbl, .stat .sub {
+    color: rgba(40,28,16,0.50);
+  }
+  .pill {
+    border-radius: 20px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset;
+  }
+  .pill-amr {
+    background: rgba(210,245,238,0.70);
+    color: oklch(42% 0.13 185);
+  }
+  .pill-dms {
+    background: rgba(220,235,255,0.70);
+    color: oklch(44% 0.14 240);
+  }
+  .pill-man {
+    background: rgba(255,242,210,0.70);
+    color: oklch(46% 0.16 55);
+  }
+  .pill-pref, .pill-auto {
+    background: rgba(255,253,248,0.55);
+    border: 1px solid rgba(255,255,255,0.80);
+    color: rgba(40,28,16,0.50);
+  }
+  .toolbar input[type="text"], .toolbar input[type="number"], .toolbar select {
+    background: rgba(255,253,248,0.55);
+    border: 1px solid rgba(255,255,255,0.80);
+    border-radius: 20px;
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    box-shadow: 0 2px 8px rgba(120,100,70,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    color: rgba(40,28,16,0.82);
+  }
+  .toolbar input:focus, .toolbar select:focus {
+    background: rgba(255,255,255,0.90);
+    box-shadow: 0 0 0 4px rgba(255,245,220,0.45), 0 4px 16px rgba(120,100,70,0.08), inset 0 1px 0 rgba(255,255,255,1);
+    outline: none;
+  }
+  .btn {
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  body .btn-primary {
+    background: rgba(255,253,248,0.85) !important;
+    border: 1px solid rgba(255,255,255,0.82) !important;
+    color: rgba(40,28,16,0.82) !important;
+    box-shadow: 0 2px 0 rgba(255,255,255,1) inset, 0 -1px 0 rgba(180,160,130,0.08) inset, 1px 0 0 rgba(255,255,255,0.7) inset, -1px 0 0 rgba(255,255,255,0.7) inset, 0 4px 16px rgba(120,100,70,0.07) !important;
+  }
+  .btn-primary:hover {
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 0 rgba(255,255,255,1) inset, 0 -1px 0 rgba(180,160,130,0.08) inset, 1px 0 0 rgba(255,255,255,0.7) inset, -1px 0 0 rgba(255,255,255,0.7) inset, 0 8px 24px rgba(120,100,70,0.10);
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: rgba(40,28,16,0.50);
+  }
+  .btn-ghost:hover {
+    background: rgba(255,253,248,0.55);
+    color: rgba(40,28,16,0.82);
+  }
+  body .upload {
+    background: rgba(255,253,248,0.62) !important;
+    border: 2px dashed rgba(255,255,255,0.82) !important;
+    border-radius: 10px;
+    backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    color: rgba(40,28,16,0.50) !important;
+  }
+  .upload:hover, .upload.drag {
+    border-color: oklch(48% 0.14 240);
+    background: rgba(255,253,248,0.75);
+  }
+  .upload.compact {
+    background: rgba(255,253,248,0.55);
+    border: 1px solid rgba(255,255,255,0.80);
+    backdrop-filter: blur(20px) saturate(2);
+  }
+  body .table-wrap {
+    border: 1px solid rgba(255,255,255,0.82) !important;
+    border-radius: 10px;
+    background: rgba(255,253,248,0.62) !important;
+    backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(2.2) brightness(1.04) !important;
+  }
+  .table-wrap thead th {
+    background: rgba(255,253,248,0.82);
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    border-bottom: 1px solid rgba(255,255,255,0.80);
+    box-shadow: 0 1px 0 rgba(255,255,255,1), 0 2px 8px rgba(120,100,70,0.04);
+    color: rgba(40,28,16,0.32);
+  }
+  .table-wrap tbody td {
+    color: rgba(40,28,16,0.82);
+    border-bottom: 1px solid rgba(40,28,16,0.04);
+  }
+  .table-wrap tbody tr:nth-child(odd of tr.main) {
+    background: rgba(255,255,255,0.25);
+  }
+  .table-wrap tbody tr:nth-child(even of tr.main) {
+    background: rgba(255,253,248,0.15);
+  }
+  .table-wrap tbody tr.main:hover {
+    background: rgba(255,255,255,0.72);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(255,255,255,0.6);
+  }
+  .table-wrap tbody tr.main.selected {
+    background: rgba(235,245,255,0.55);
+  }
+  .table-wrap tbody tr.detail td {
+    background: rgba(255,253,248,0.25);
+    border-bottom: 1px solid rgba(255,255,255,0.80);
+  }
+  .seg {
+    background: rgba(255,253,248,0.35);
+    border: 1px solid rgba(255,255,255,0.80);
+    border-radius: 10px;
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  }
+  .seg .seg-num {
+    color: rgba(40,28,16,0.82);
+  }
+  .seg .seg-meta {
+    color: rgba(40,28,16,0.50);
+  }
+  .duration-legend {
+    background: rgba(255,253,248,0.35);
+    border: 1px solid rgba(255,255,255,0.80);
+    border-radius: 10px;
+  }
+  .duration-legend .tier-dot {
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  #map {
+    border: 1px solid rgba(255,255,255,0.82);
+    border-radius: 10px;
+    background: #e2e8f0;
+  }
+  .map-legend-item {
+    background: rgba(255,253,248,0.30);
+    border: 1px solid rgba(255,255,255,0.80);
+    border-radius: 20px;
+  }
+  .marker-pin {
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .lang-switch {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    backdrop-filter: blur(12px) saturate(2);
+    -webkit-backdrop-filter: blur(12px) saturate(2);
+  }
+  .empty {
+    color: rgba(40,28,16,0.50);
+  }
+  .empty h3 {
+    color: rgba(40,28,16,0.82);
+  }
+  .row-link {
+    color: rgba(40,28,16,0.82);
+    text-decoration: underline;
+  }
+  .modal-overlay {
+    background: rgba(15,23,42,0.55);
+  }
+  .modal {
+    background: rgba(255,253,248,0.95);
+    backdrop-filter: blur(28px) saturate(2.2);
+    -webkit-backdrop-filter: blur(28px) saturate(2.2);
+    border: 1px solid rgba(255,255,255,0.82);
+    box-shadow: var(--glass-shadow);
+  }
+  .modal-hdr {
+    border-bottom: 1px solid rgba(255,255,255,0.80);
+  }
+  .modal-ftr {
+    border-top: 1px solid rgba(255,255,255,0.80);
+    background: rgba(255,253,248,0.55);
+  }
+  .modal-body input[type="password"] {
+    background: rgba(255,253,248,0.55);
+    border: 1px solid rgba(255,255,255,0.80);
+    border-radius: 20px;
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    box-shadow: 0 2px 8px rgba(120,100,70,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    color: rgba(40,28,16,0.82);
+  }
+  .modal-body input[type="password"]:focus {
+    background: rgba(255,255,255,0.90);
+    box-shadow: 0 0 0 4px rgba(255,245,220,0.45), 0 4px 16px rgba(120,100,70,0.08), inset 0 1px 0 rgba(255,255,255,1);
+    outline: none;
+  }
+  .toast {
+    background: rgba(58,48,36,0.88);
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.09);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
   :root{
     --bg:#f3f5f9; --card:#ffffff; --border:#e2e8f0; --muted:#5a6f85;
     --text:#0f172a; --primary:#4a6fa5; --primary-soft:#e8edf6;
@@ -239,7 +626,6 @@
     <div class="empty">
       <div style="font-size:2.4rem">&#9889;</div>
       <h3 data-i18n="noData">Ingen data laddad</h3>
-      <p id="emptyHelp">Be analytikern köra <strong>AMR vs. DMS outage report</strong> och klicka <strong>"Export for CS"</strong>. Ladda sedan filen ovan.</p>
     </div>
   </div>
 
@@ -313,7 +699,6 @@ var I18N = {
     markerColor: 'Kantfärg = vald källa',
     mapNote: 'Fyllningsfärg = avbrottstid, kantfärg = källa',
     noData: 'Ingen data laddad',
-    noDataHelp: 'Be analytikern köra <strong>AMR vs. DMS outage report</strong> och klicka <strong>"Export for CS"</strong>. Ladda sedan filen ovan.',
     unlockTitle: 'Lås upp krypterad fil',
     unlockDesc: 'Filen är AES-krypterad. Ange den delade krypteringsnyckeln (samma som används vid export i huvudappen).',
     encryptionKey: 'Krypteringsnyckel',
@@ -405,7 +790,6 @@ var I18N = {
     markerColor: 'Reunaväri = valittu lähde',
     mapNote: 'Täyttöväri = katkoaika, reunaväri = lähde',
     noData: 'Ei ladattuja tietoja',
-    noDataHelp: 'Pyydä analyytikkoa ajamaan <strong>AMR vs. DMS outage report</strong> ja napsauttamaan <strong>"Export for CS"</strong>. Lataa sitten tiedosto yllä.',
     unlockTitle: 'Avaa salattu tiedosto',
     unlockDesc: 'Tiedosto on AES-salattu. Anna jaettu salausavain (sama kuin vientiin pääsovelluksessa).',
     encryptionKey: 'Salausavain',
@@ -504,8 +888,6 @@ function refreshLanguage(){
     if(key) el.title = t(key);
   });
   // Special HTML-content elements
-  var emptyHelp = document.getElementById('emptyHelp');
-  if(emptyHelp) emptyHelp.innerHTML = t('noDataHelp');
   var uploadHelp = document.getElementById('uploadHelp');
   if(uploadHelp) uploadHelp.innerHTML = t('dropHelp');
   var markerLegend = document.getElementById('markerLegend');
