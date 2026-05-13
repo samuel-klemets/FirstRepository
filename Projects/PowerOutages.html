@@ -465,6 +465,9 @@
   tbody td{padding:.42rem .55rem;vertical-align:middle;white-space:nowrap}
   tbody tr.main{cursor:pointer}
   tbody tr.detail td{padding:.6rem .9rem}
+  .more-cell{text-align:right;width:1%;padding-right:.35rem}
+  .more-btn{width:24px;height:24px;border-radius:999px;border:1px solid rgba(74,111,165,.32);background:rgba(255,255,255,.64);color:var(--primary);font-size:.95rem;font-weight:700;line-height:1;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 1px 0 rgba(255,255,255,.8) inset;cursor:pointer}
+  tr.main:hover .more-btn,tr.main.selected .more-btn{background:var(--primary);color:#fff;border-color:var(--primary)}
   .pill{display:inline-block;padding:.12rem .5rem;border-radius:999px;font-size:.7rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}
   .pill-pref{margin-left:.25rem}
   .pill-auto{margin-left:.25rem}
@@ -567,7 +570,7 @@
     <div class="card">
       <div class="stats" id="statsStrip"></div>
       <div class="toolbar">
-        <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Sök på mätare, place ID, transformator, adress, koppling...">
+        <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Sök på mätare, place ID, transformator, adress, anslutning...">
         <label data-i18n="source">Källa
           <select id="sourceFilter">
             <option value="" data-i18n="all">Alla</option>
@@ -597,13 +600,14 @@
                 <th data-col="meterId" data-i18n="meter">Mätare<span class="sort-i"></span></th>
                 <th data-col="placeId" data-i18n="placeId">KP<span class="sort-i"></span></th>
                 <th data-col="transformer" data-i18n="transformer">Transformator<span class="sort-i"></span></th>
-                <th data-col="connection" data-i18n="connection">Koppling<span class="sort-i"></span></th>
+                <th data-col="connection" data-i18n="connection">Anslutning<span class="sort-i"></span></th>
                 <th data-col="street" data-i18n="address">Adress<span class="sort-i"></span></th>
                 <th data-col="source" data-i18n="source">Källa<span class="sort-i"></span></th>
                 <th data-col="primaryStart" data-i18n="outageStarted">Avbrott började<span class="sort-i"></span></th>
                 <th data-col="primaryEnd" data-i18n="outageEnded">Avbrott slutade<span class="sort-i"></span></th>
                 <th data-col="primaryDuration" data-i18n="length">Längd<span class="sort-i">&darr;</span></th>
                 <th data-col="outageCount" data-i18n-title="countTooltip" title="Antal separata avbrottsperioder">#</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="meterBody"></tbody>
@@ -680,7 +684,7 @@ var I18N = {
     uploadTitle: 'Ladda export-fil från PowerOutageCalculator',
     dropFile: 'Dra och släpp JSON-filen här',
     dropHelp: 'Använd knappen Ladda fil ovan, eller dra och släpp JSON-filen här. Filen är AES-krypterad (<code>.encrypted.json</code>) — du måste ange den delade krypteringsnyckeln första gången.',
-    searchPlaceholder: 'Sök på mätare, KP, transformator, adress, koppling...',
+    searchPlaceholder: 'Sök på mätare, KP, transformator, adress, anslutning...',
     source: 'Källa',
     all: 'Alla',
     timeH: 'Tid (h)',
@@ -690,7 +694,7 @@ var I18N = {
     meter: 'Mätare',
     placeId: 'KP',
     transformer: 'Transformator',
-    connection: 'Koppling',
+    connection: 'Anslutning',
     address: 'Adress',
     outageStarted: 'Avbrott började',
     outageEnded: 'Avbrott slutade',
@@ -782,7 +786,7 @@ var I18N = {
     meter: 'Mittari',
     placeId: 'KP',
     transformer: 'Muuntaja',
-    connection: 'Kytkentä',
+    connection: 'Liittymä',
     address: 'Osoite',
     outageStarted: 'Katko alkoi',
     outageEnded: 'Katko päättyi',
@@ -1474,7 +1478,7 @@ function renderTable(){
   var rows = state.filtered;
   var body = document.getElementById('meterBody');
   if(!rows.length){
-    body.innerHTML = '<tr><td colspan="10" class="empty">' + esc(t('noMetersMatch')) + '</td></tr>';
+    body.innerHTML = '<tr><td colspan="11" class="empty">' + esc(t('noMetersMatch')) + '</td></tr>';
     return;
   }
   var limit = Math.min(rows.length, TABLE_ROW_CAP);
@@ -1497,13 +1501,14 @@ function renderTable(){
       + (pctSummary ? '<span class="pct-summary">' + pctSummary + '</span>' : '')
       + '</div></td>'
       + '<td class="mono">' + (m.outageCount || 1) + '</td>'
+      + '<td class="more-cell"><span class="more-btn" title="' + esc(isSel ? 'Visa mindre' : 'Visa mer') + '">' + (isSel ? '&minus;' : '+') + '</span></td>'
       + '</tr>';
     if(isSel){
-      html += '<tr class="detail"><td colspan="10">' + renderDetailHtml(m) + '</td></tr>';
+      html += '<tr class="detail"><td colspan="11">' + renderDetailHtml(m) + '</td></tr>';
     }
   }
   if(rows.length > limit){
-    html += '<tr><td colspan="10" style="text-align:center;padding:.7rem;color:var(--muted);font-size:.8rem">'
+    html += '<tr><td colspan="11" style="text-align:center;padding:.7rem;color:var(--muted);font-size:.8rem">'
          + esc(t('showingFirst', {limit: limit, total: rows.length}))
          + '</td></tr>';
   }
