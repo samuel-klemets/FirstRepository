@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Power Outages – Customer Service</title>
+<link rel="icon" type="image/png" href="https://i.ibb.co/pBgcd5RZ/poweranalyser-2.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<link rel="stylesheet" href="../assets/styles/glass-theme.css?v=3" />
+<style>
+  :root{
+    --bg:#f3f5f9; --card:#ffffff; --border:#e2e8f0; --muted:#5a6f85;
+    --text:#0f172a; --primary:#4a6fa5; --primary-soft:#e8edf6;
+    --amr:#5a8c7a; --amr-soft:#e8f0ec;
+    --dms:#5a8e92; --dms-soft:#e8f0f1;
+    --man:#b89b6a; --man-soft:#f5f0e6;
+    --danger:#b54a4a; --warn:#b89b6a;
+    --shadow:0 2px 4px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.4}
+  header{padding:1rem 1.4rem;display:flex;align-items:center;gap:.9rem}
+  header .logo{font-size:1.8rem;line-height:1}
+  header h1{margin:0;font-size:1.15rem;font-weight:600}
+  header p{margin:.15rem 0 0;font-size:.78rem;opacity:.85}
+  .container{margin:0 auto;padding:1rem 1.4rem 3rem}
+  .card{padding:1rem 1.1rem;margin-bottom:1rem;transition:box-shadow .2s}
+  .card-title{font-weight:600;font-size:.95rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+  .upload{border-radius:12px;padding:1.4rem;text-align:center;cursor:pointer;transition:.2s}
+  .upload.compact{padding:.45rem .85rem;border-style:solid;text-align:left;display:flex;align-items:center;gap:.65rem;cursor:default}
+  .upload.compact:hover{cursor:default}
+  .upload.compact .upload-icon{font-size:1.15rem}
+  .upload.compact h3{font-size:.82rem;margin:0}
+  .upload.compact p{font-size:.68rem;margin:0}
+  #uploadCard.compact{padding:.45rem .75rem}
+  .upload h3{margin:.4rem 0 .25rem;font-size:1rem}
+  .upload p{margin:0;font-size:.8rem}
+  .upload-icon{font-size:2rem}
+  #fileInput{display:none}
+  .file-meta{margin-top:.7rem;font-size:.8rem;display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+  .file-meta strong{}
+  .btn{appearance:none;padding:.45rem .85rem;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:500;transition:.15s;display:inline-flex;align-items:center;gap:.4rem}
+  .btn-primary{cursor:pointer}
+  .btn-ghost{padding:.3rem .55rem}
+  .lang-switch{appearance:none;padding:.32rem .6rem .32rem .5rem;border-radius:6px;font-size:.78rem;cursor:pointer;outline:none;margin-left:auto}
+  .lang-switch option{}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem;margin-bottom:.8rem}
+  .stat{border-radius:12px;padding:.6rem .8rem}
+  .stat .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+  .stat .val{font-size:1.4rem;font-weight:600;margin-top:.1rem}
+  .stat .sub{font-size:.72rem;margin-top:.05rem}
+  .toolbar{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;margin-bottom:.8rem}
+  .toolbar input[type=text],.toolbar input[type=number],.toolbar select{border-radius:8px;padding:.42rem .65rem;font-size:.82rem;outline:none;font-family:inherit}
+  .toolbar input[type=text]{flex:1;min-width:240px;border:1px solid rgba(74,111,165,.35);background:rgba(255,255,255,.96);color:var(--text);box-shadow:0 1px 3px rgba(15,23,42,.08)}
+  .toolbar input[type=text]::placeholder{color:#7b8da6;opacity:1}
+  .toolbar input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(74,111,165,.16),0 1px 3px rgba(15,23,42,.08)}
+  .toolbar input[type=number]{width:90px}
+  .toolbar label{font-size:.78rem;display:inline-flex;align-items:center;gap:.35rem}
+  .layout{display:grid;grid-template-columns:1fr;gap:1rem}
+  @media (min-width:1200px){.layout{grid-template-columns:minmax(0, 55%) minmax(0, 1fr)}}
+  #map{height:min(82vh, 1000px);min-height:560px;width:100%;border-radius:12px}
+  .cs-cluster{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.8rem;border:2px solid #fff}
+  .map-legend{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;font-size:.78rem}
+  .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:.3rem;vertical-align:middle}
+  .duration-legend{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.55rem;padding:.45rem .6rem;border-radius:8px;font-size:.72rem}
+  .duration-legend .tier{display:flex;align-items:center;gap:.25rem;white-space:nowrap}
+  .duration-legend .tier-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .map-note{font-size:.72rem;margin-top:.4rem;font-style:italic}
+  .table-wrap{max-height:min(82vh, 1000px);min-height:560px;overflow:auto;border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  thead th{position:sticky;top:0;z-index:2;text-align:left;padding:.45rem .55rem;font-weight:600;white-space:nowrap;cursor:pointer;user-select:none;font-size:.78rem;text-transform:uppercase;letter-spacing:.03em}
+  thead th .sort-i{font-size:.65rem;margin-left:.25rem}
+  tbody td{padding:.42rem .55rem;vertical-align:middle;white-space:nowrap}
+  tbody tr.main{cursor:pointer}
+  tbody tr.detail td{padding:.6rem .9rem}
+  .pill{display:inline-block;padding:.12rem .5rem;border-radius:999px;font-size:.7rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+  .pill-pref{margin-left:.25rem}
+  .pill-auto{margin-left:.25rem}
+  .mono{font-variant-numeric:tabular-nums;font-feature-settings:'tnum';white-space:nowrap}
+  .dur{font-weight:600}
+  .dur-cell{white-space:normal}
+  .dur-main{display:flex;flex-direction:column;align-items:flex-end;gap:.18rem}
+  .pct-summary{display:flex;align-items:center;justify-content:flex-end;gap:.2rem .3rem;flex-wrap:wrap;font-size:.67rem;line-height:1.1}
+  .pct-summary .pct-plus{color:var(--muted);font-weight:600}
+  .comp-split-list{display:flex;flex-direction:column;gap:.2rem;border-top:1px solid rgba(148,163,184,.18);margin-top:.35rem;padding-top:.35rem}
+  .comp-split-row{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .55rem;padding:.14rem 0;font-size:.76rem}
+  .comp-split-num{font-weight:600;min-width:1.7rem}
+  .seg-list{display:flex;flex-direction:column;gap:.3rem;margin-top:.4rem}
+  .seg{display:flex;flex-wrap:wrap;gap:.4rem .9rem;border-radius:8px;padding:.4rem .65rem;font-size:.78rem}
+  .seg .seg-num{font-weight:600;min-width:1.6rem}
+  .empty{padding:2.5rem;text-align:center}
+  .empty h3{margin:.4rem 0}
+  .toast{position:fixed;bottom:1.2rem;right:1.2rem;padding:.7rem 1rem;border-radius:8px;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s;z-index:9999}
+  .toast.show{opacity:1}
+  .marker-pin{width:18px;height:18px;border-radius:50%;border:2px solid #fff;display:block}
+  .marker-popup{font-size:.8rem;line-height:1.35}
+  .marker-popup strong{display:block;margin-bottom:.2rem}
+  .row-link{background:transparent;border:0;padding:0;cursor:pointer;font-size:.78rem;text-decoration:underline}
+  .copy-btn{background:transparent;border-radius:6px;font-size:.7rem;padding:.1rem .4rem;cursor:pointer}
+  details summary{cursor:pointer;font-weight:600}
+  .footer-note{margin-top:.6rem;font-size:.72rem}
+  .counted-win{background:var(--primary-soft);border:1.5px solid var(--primary);border-radius:8px;padding:.42rem .75rem;margin:.45rem 0 .3rem;display:flex;align-items:center;flex-wrap:wrap;gap:.35rem .85rem}
+  .counted-win-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--primary);flex-shrink:0}
+  .counted-win-range{font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .counted-win-dur{font-weight:700;font-size:.88rem;margin-left:auto;white-space:nowrap}
+  .seg-row-wrap{margin-bottom:.55rem}
+  .seg-badge{display:inline-block;padding:.1rem .38rem;border-radius:4px;font-size:.67rem;font-weight:700;letter-spacing:.02em;white-space:nowrap;vertical-align:middle}
+  .seg-badge-counted{background:#dcfce7;color:#15803d}
+  .seg-badge-ignored{background:#f1f5f9;color:#64748b;font-weight:500}
+  .seg-badge-pct{background:#fef3c7;color:#78350f}
+  .seg-badge-pct-zero{background:#f1f5f9;color:#94a3b8;font-weight:500}
+  .comp-breakdown{margin:.4rem 0 .1rem}
+  .comp-breakdown-hdr{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--muted);margin:.55rem 0 .2rem}
+  .comp-row{display:flex;align-items:center;flex-wrap:wrap;gap:.25rem .65rem;border-radius:7px;padding:.3rem .5rem;font-size:.8rem;margin-bottom:.18rem;background:var(--bg)}
+  .comp-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block}
+  .comp-row-range{font-size:.78rem;white-space:nowrap}
+  .comp-row-dur{font-weight:600;white-space:nowrap}
+  .comp-row-zero{opacity:.5}
+  .seg-list-sub{padding-left:1.1rem;margin-bottom:.1rem}
+  .outage-group{border:1px solid rgba(74,111,165,.18);border-left:4px solid var(--primary);border-radius:8px;margin:.35rem 0 .5rem;background:rgba(255,255,255,.72);overflow:hidden}
+  .outage-group .comp-row{margin:0;border-radius:0;background:linear-gradient(90deg,rgba(232,237,246,.9),rgba(255,255,255,.86))}
+  .outage-group.comp-row-zero{border-left-color:#cbd5e1;opacity:1}
+  .outage-group.comp-row-zero .comp-row{background:#f8fafc;color:#64748b}
+  .outage-group.comp-row-fault{border-left-color:#7c3aed}
+  .fault-note{font-size:.7rem;font-weight:700;color:#6d28d9;background:#ede9fe;border-radius:999px;padding:.1rem .42rem;white-space:nowrap}
+  .group-note{font-size:.72rem;color:var(--muted);padding:.25rem .65rem .45rem}
+  .seg-list-sub .seg{background:transparent;border-radius:0;border-top:1px solid rgba(148,163,184,.2);padding:.32rem .65rem}
+  .modal-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9000;padding:1rem}
+  .modal{border-radius:14px;max-width:460px;width:100%;overflow:hidden}
+  .modal-hdr{padding:.9rem 1.1rem;font-weight:600;font-size:1rem}
+  .modal-body{padding:1rem 1.1rem}
+  .modal-body p{margin:.2rem 0 .6rem;font-size:.85rem}
+  .modal-body input[type=password]{width:100%;padding:.6rem .75rem;border-radius:8px;font-size:.9rem;outline:none;font-family:inherit}
+  .modal-ftr{padding:.8rem 1.1rem;display:flex;justify-content:flex-end;gap:.5rem}
+  .unlock-status{margin-top:.55rem;min-height:1.2rem;font-size:.8rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">&#9889;</div>
+  <div>
+    <h1 data-i18n="title">Power Outages – kundbetjäning</h1>
+    <p data-i18n="subtitle">Visar slutgiltiga avbrottstider per mätare. Endast läsläge.</p>
+  </div>
+  <select class="lang-switch" id="langSwitch" onchange="state.lang=this.value;saveLanguage();refreshLanguage();">
+    <option value="sv" selected>SV</option>
+    <option value="fi">FI</option>
+  </select>
+  <div style="display:flex;gap:.5rem">
+    <button class="btn" id="reloadBtn" onclick="document.getElementById('fileInput').click()">&#128194; <span data-i18n="loadFile">Ladda fil</span></button>
+    <button class="btn btn-ghost" id="clearBtn" onclick="clearData()" style="display:none"><span data-i18n="clear">Rensa</span></button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="card compact" id="uploadCard">
+    <div class="card-title">&#128194; <span data-i18n="uploadTitle">Ladda export-fil från PowerOutageCalculator</span></div>
+    <div class="upload compact" id="uploadZone">
+      <div class="upload-icon">&#128193;</div>
+      <h3 data-i18n="dropFile">Dra och släpp JSON-filen här</h3>
+      <p id="uploadHelp">Använd knappen Ladda fil ovan, eller dra och släpp JSON-filen här. Filen är AES-krypterad (<code>.encrypted.json</code>) — du måste ange den delade krypteringsnyckeln första gången.</p>
+    </div>
+    <input type="file" id="fileInput" accept=".json,application/json,.encrypted.json">
+    <div class="file-meta" id="fileMeta"></div>
+  </div>
+
+  <div id="resultsView" style="display:none">
+
+    <div class="card">
+      <div class="stats" id="statsStrip"></div>
+      <div class="toolbar">
+        <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Sök på mätare, place ID, transformator, adress, koppling...">
+        <label data-i18n="source">Källa
+          <select id="sourceFilter">
+            <option value="" data-i18n="all">Alla</option>
+            <option value="AMR">AMR</option>
+            <option value="DMS">DMS</option>
+            <option value="MAN">MAN</option>
+          </select>
+        </label>
+        <label data-i18n="timeH">Tid (h)
+          <input type="number" id="minDur" data-i18n-placeholder="min" placeholder="Min" min="0" step="0.5">
+          <span class="muted">–</span>
+          <input type="number" id="maxDur" data-i18n-placeholder="max" placeholder="Max" min="0" step="0.5">
+        </label>
+        <button class="btn btn-ghost" onclick="resetFilters()">&#10227; <span data-i18n="reset">Återställ</span></button>
+        <span style="margin-left:auto;font-size:.78rem;color:var(--muted)" id="rowCount"></span>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <div class="card" style="padding:.7rem">
+        <div class="card-title" style="margin-bottom:.5rem">&#128202; <span data-i18n="outagesByMeter">Avbrott per mätare</span></div>
+        <div class="table-wrap">
+          <table id="meterTable">
+            <thead>
+              <tr>
+                <th data-col="meterId" data-i18n="meter">Mätare<span class="sort-i"></span></th>
+                <th data-col="placeId" data-i18n="placeId">KP<span class="sort-i"></span></th>
+                <th data-col="transformer" data-i18n="transformer">Transformator<span class="sort-i"></span></th>
+                <th data-col="connection" data-i18n="connection">Koppling<span class="sort-i"></span></th>
+                <th data-col="street" data-i18n="address">Adress<span class="sort-i"></span></th>
+                <th data-col="source" data-i18n="source">Källa<span class="sort-i"></span></th>
+                <th data-col="primaryStart" data-i18n="outageStarted">Avbrott började<span class="sort-i"></span></th>
+                <th data-col="primaryEnd" data-i18n="outageEnded">Avbrott slutade<span class="sort-i"></span></th>
+                <th data-col="primaryDuration" data-i18n="length">Längd<span class="sort-i">&darr;</span></th>
+                <th data-col="outageCount" data-i18n-title="countTooltip" title="Antal separata avbrottsperioder">#</th>
+              </tr>
+            </thead>
+            <tbody id="meterBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="padding:.7rem">
+        <div class="card-title" style="margin-bottom:.5rem">&#128506;&#65039; <span data-i18n="map">Karta</span></div>
+        <div id="map"></div>
+        <div class="map-note" id="mapNote">Fyllningsfärg = avbrottstid, kantfärg = källa</div>
+        <div class="duration-legend" id="durationLegend"></div>
+        <div class="map-legend">
+          <span><span class="legend-dot" style="background:var(--amr)"></span><span data-i18n="amrLegend">AMR</span></span>
+          <span><span class="legend-dot" style="background:var(--dms)"></span><span data-i18n="dmsLegend">DMS</span></span>
+          <span><span class="legend-dot" style="background:var(--man)"></span><span data-i18n="manLegend">MAN (manuellt)</span></span>
+          <span class="footer-note" id="markerLegend" style="margin-left:auto">Kantfärg = vald källa</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card" id="emptyState">
+    <div class="empty">
+      <div style="font-size:2.4rem">&#9889;</div>
+      <h3 data-i18n="noData">Ingen data laddad</h3>
+      <p id="emptyHelp">Be analytikern köra <strong>AMR vs. DMS outage report</strong> och klicka <strong>"Export for CS"</strong>. Ladda sedan filen ovan.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="unlockModal" style="display:none">
+  <div class="modal">
+    <div class="modal-hdr">&#128274; <span data-i18n="unlockTitle">Lås upp krypterad fil</span></div>
+    <div class="modal-body">
+      <p data-i18n="unlockDesc">Filen är AES-krypterad. Ange den delade krypteringsnyckeln (samma som används vid export i huvudappen).</p>
+      <input type="password" id="unlockKeyInput" data-i18n-placeholder="encryptionKey" placeholder="Krypteringsnyckel" autocomplete="off">
+      <div class="unlock-status" id="unlockStatus"></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="cancelUnlock()" data-i18n="cancel">Avbryt</button>
+      <button class="btn btn-primary" id="unlockSubmitBtn" onclick="submitUnlock()" data-i18n="unlock">Lås upp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── State ────────────────────────────────────────────────────────────────
+var state = {
+  meters: [],
+  filtered: [],
+  exportedAt: '',
+  filename: '',
+  cacheSavedAt: 0,
+  cachePayload: null,
+  sortCol: 'primaryDuration',
+  sortDir: 'desc',
+  selectedKey: null,
+  lang: 'sv'
+};
+
+// ── I18N ─────────────────────────────────────────────────────────────────
+var I18N = {
+  sv: {
+    title: 'Power Outages – kundbetjäning',
+    subtitle: 'Visar slutgiltiga avbrottstider per mätare. Endast läsläge.',
+    loadFile: 'Ladda fil',
+    clear: 'Rensa',
+    uploadTitle: 'Ladda export-fil från PowerOutageCalculator',
+    dropFile: 'Dra och släpp JSON-filen här',
+    dropHelp: 'Använd knappen Ladda fil ovan, eller dra och släpp JSON-filen här. Filen är AES-krypterad (<code>.encrypted.json</code>) — du måste ange den delade krypteringsnyckeln första gången.',
+    searchPlaceholder: 'Sök på mätare, KP, transformator, adress, koppling...',
+    source: 'Källa',
+    all: 'Alla',
+    timeH: 'Tid (h)',
+    min: 'Min',
+    max: 'Max',
+    reset: 'Återställ',
+    meter: 'Mätare',
+    placeId: 'KP',
+    transformer: 'Transformator',
+    connection: 'Koppling',
+    address: 'Adress',
+    outageStarted: 'Avbrott började',
+    outageEnded: 'Avbrott slutade',
+    length: 'Längd',
+    countTooltip: 'Antal separata avbrottsperioder',
+    outagesByMeter: 'Avbrott per mätare',
+    map: 'Karta',
+    amrLegend: 'AMR',
+    dmsLegend: 'DMS',
+    manLegend: 'MAN (manuellt)',
+    markerColor: 'Kantfärg = vald källa',
+    mapNote: 'Fyllningsfärg = avbrottstid, kantfärg = källa',
+    noData: 'Ingen data laddad',
+    noDataHelp: 'Be analytikern köra <strong>AMR vs. DMS outage report</strong> och klicka <strong>"Export for CS"</strong>. Ladda sedan filen ovan.',
+    unlockTitle: 'Lås upp krypterad fil',
+    unlockDesc: 'Filen är AES-krypterad. Ange den delade krypteringsnyckeln (samma som används vid export i huvudappen).',
+    encryptionKey: 'Krypteringsnyckel',
+    cancel: 'Avbryt',
+    unlock: 'Lås upp',
+    readError: 'Kunde inte läsa filen',
+    parseError: 'Kunde inte läsa filen: ',
+    browserNoCrypto: 'Webbläsaren stöder inte krypterings-API:er',
+    wrongFormat: 'Fel filformat. Förväntar power-outage-customer-service JSON.',
+    restored: 'Återställde {n} mätare från lokal cache',
+    loaded: 'Laddade {n} mätare (sparas lokalt i 30 dagar)',
+    cleared: 'Rensad',
+    metersWithOutage: 'Mätare med avbrott',
+    withMap: 'med karta',
+    finalSelected: 'slutligt valda',
+    manuallySelected: 'manuellt valda',
+    longestOutage: 'Längsta avbrott',
+    average: 'Genomsnitt',
+    noMetersMatch: 'Inga mätare matchar filtren.',
+    showingFirst: 'Visar första {limit} av {total} rader. Förfina sökningen för att hitta en specifik mätare.',
+    finalChoice: 'Slutgiltigt val',
+    amrSystem: 'AMR-system',
+    consumption: 'Förbrukning',
+    outagePeriods: 'Avbrottsperioder',
+    noSegmentData: 'Ingen segment-data.',
+    ongoing: 'pågående',
+    total: 'Total',
+    sumAllPeriods: 'summa av alla perioder',
+    primaryLength: 'längd som räknats för standardersättning',
+    zoomMap: 'Zooma karta',
+    source2: 'Källa',
+    outage: 'Avbrott',
+    showInTable: 'Visa i tabell',
+    meter2: 'Mätare',
+    matareUnit: 'mätare',
+    exported: 'Exporterad',
+    savedLocally: 'Sparat lokalt',
+    expiresIn: 'går ut om',
+    daysShort: 'd',
+    hoursShort: 'h',
+    enterKey: 'Ange krypteringsnyckeln',
+    decrypting: 'Dekrypterar...',
+    wrongKey: 'Fel nyckel eller skadad fil. Försök igen.',
+    cacheOpenError: 'Kunde inte öppna lokal cache. Ladda filen på nytt.',
+    cacheExpired: 'Cachat lokalt, rensas automatiskt efter 30 dagar',
+    countedWindow: 'Räknat avbrott',
+    countedSeg: 'RÄKNAD',
+    ignoredShortSeg: 'ignorerad <3min',
+    otherOutageRow: 'Separat avbrott',
+    compensationPeriods: 'Beräknade avbrott',
+    interruptions: 'avbrott',
+    interruption: 'avbrott',
+    compSplitTitle: 'Ersättningsrader',
+    compAmount: 'Ersättning',
+    noCompUnder12h: 'under 12h, ingen standardersättning',
+    normalEnd: 'normal stopptid',
+    faultExtended: 'fault-förlängd',
+    includedInCalculatedOutage: 'ingår i beräknat avbrott'
+  },
+  fi: {
+    title: 'Sähkökatkokset – asiakaspalvelu',
+    subtitle: 'Näyttää lopulliset katkoajat per mittari. Vain lukutila.',
+    loadFile: 'Lataa tiedosto',
+    clear: 'Tyhjennä',
+    uploadTitle: 'Lataa vientitiedosto PowerOutageCalculatorista',
+    dropFile: 'Vedä ja pudota JSON-tiedosto tähän',
+    dropHelp: 'Käytä yläreunan Lataa tiedosto -painiketta tai vedä ja pudota JSON-tiedosto tähän. Tiedosto on AES-salattu (<code>.encrypted.json</code>) — sinun on annettava jaettu salausavain ensimmäisellä kerralla.',
+    searchPlaceholder: 'Hae mittarilla, KP, muuntajalla, osoitteella, kytkennällä...',
+    source: 'Lähde',
+    all: 'Kaikki',
+    timeH: 'Aika (h)',
+    min: 'Min',
+    max: 'Max',
+    reset: 'Nollaa',
+    meter: 'Mittari',
+    placeId: 'KP',
+    transformer: 'Muuntaja',
+    connection: 'Kytkentä',
+    address: 'Osoite',
+    outageStarted: 'Katko alkoi',
+    outageEnded: 'Katko päättyi',
+    length: 'Kesto',
+    countTooltip: 'Eri katkojaksojen määrä',
+    outagesByMeter: 'Katkot per mittari',
+    map: 'Kartta',
+    amrLegend: 'AMR',
+    dmsLegend: 'DMS',
+    manLegend: 'MAN (manuaalinen)',
+    markerColor: 'Reunaväri = valittu lähde',
+    mapNote: 'Täyttöväri = katkoaika, reunaväri = lähde',
+    noData: 'Ei ladattuja tietoja',
+    noDataHelp: 'Pyydä analyytikkoa ajamaan <strong>AMR vs. DMS outage report</strong> ja napsauttamaan <strong>"Export for CS"</strong>. Lataa sitten tiedosto yllä.',
+    unlockTitle: 'Avaa salattu tiedosto',
+    unlockDesc: 'Tiedosto on AES-salattu. Anna jaettu salausavain (sama kuin vientiin pääsovelluksessa).',
+    encryptionKey: 'Salausavain',
+    cancel: 'Peruuta',
+    unlock: 'Avaa',
+    readError: 'Ei voitu lukea tiedostoa',
+    parseError: 'Ei voitu lukea tiedostoa: ',
+    browserNoCrypto: 'Selain ei tue salaus-API:ita',
+    wrongFormat: 'Väärä tiedostomuoto. Odotettu power-outage-customer-service JSON.',
+    restored: 'Palautettiin {n} mittaria paikallisesta välimuistista',
+    loaded: 'Ladattiin {n} mittaria (tallennetaan paikallisesti 30 päiväksi)',
+    cleared: 'Tyhjennetty',
+    metersWithOutage: 'Mittarit katkolla',
+    withMap: 'kartalla',
+    finalSelected: 'lopullinen valinta',
+    manuallySelected: 'manuaalinen valinta',
+    longestOutage: 'Pisin katko',
+    average: 'Keskiarvo',
+    noMetersMatch: 'Ei mittareita vastaa suodattimia.',
+    showingFirst: 'Näytetään ensimmäiset {limit} / {total} riviä. Tarkenna hakua löytääksesi tietyn mittarin.',
+    finalChoice: 'Lopullinen valinta',
+    amrSystem: 'AMR-järjestelmä',
+    consumption: 'Kulutus',
+    outagePeriods: 'Katkojaksot',
+    noSegmentData: 'Ei segmenttitietoja.',
+    ongoing: 'meneillään',
+    total: 'Yhteensä',
+    sumAllPeriods: 'kaikkien jaksojen summa',
+    primaryLength: 'Ensisijainen kesto',
+    zoomMap: 'Zoomaa karttaa',
+    source2: 'Lähde',
+    outage: 'Katko',
+    showInTable: 'Näytä taulukossa',
+    meter2: 'Mittari',
+    matareUnit: 'mittaria',
+    exported: 'Viety',
+    savedLocally: 'Tallennettu paikallisesti',
+    expiresIn: 'vanhenee',
+    daysShort: 'pv',
+    hoursShort: 't',
+    enterKey: 'Anna salausavain',
+    decrypting: 'Puretaan salausta...',
+    wrongKey: 'Väärä avain tai vaurioitunut tiedosto. Yritä uudelleen.',
+    cacheOpenError: 'Paikallista välimuistia ei voitu avata. Lataa tiedosto uudelleen.',
+    cacheExpired: 'Tallennettu paikallisesti, tyhjennetään automaattisesti 30 päivän kuluttua',
+    countedWindow: 'Laskettu katko',
+    countedSeg: 'LASKETTU',
+    ignoredShortSeg: 'ohitettu <3min',
+    otherOutageRow: 'Erillinen katko',
+    compensationPeriods: 'Lasketut katkot',
+    interruptions: 'katkoa',
+    interruption: 'katko',
+    compSplitTitle: 'Korvausrivit',
+    compAmount: 'Korvaus',
+    noCompUnder12h: 'alle 12h, ei vakiokorvausta',
+    normalEnd: 'normaali päättymisaika',
+    faultExtended: 'vika-pidennetty',
+    includedInCalculatedOutage: 'sisältyy laskettuun katkoon'
+  }
+};
+
+function t(key, opts){
+  var dict = I18N[state.lang] || I18N['sv'];
+  var s = dict[key] || I18N['sv'][key] || key;
+  if(!opts) return s;
+  return s.replace(/\{(\w+)\}/g, function(m, p){ return opts[p] != null ? opts[p] : m; });
+}
+
+function refreshLanguage(){
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var key = el.getAttribute('data-i18n');
+    if(!key) return;
+    var val = t(key);
+    if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'){
+      el.placeholder = val;
+    } else if(el.tagName === 'OPTION'){
+      el.textContent = val;
+    } else {
+      var found = false;
+      for(var i = 0; i < el.childNodes.length; i++){
+        if(el.childNodes[i].nodeType === 3){
+          el.childNodes[i].textContent = val;
+          found = true; break;
+        }
+      }
+      if(!found) el.textContent = val;
+    }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+    var key = el.getAttribute('data-i18n-placeholder');
+    if(key) el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(function(el){
+    var key = el.getAttribute('data-i18n-title');
+    if(key) el.title = t(key);
+  });
+  // Special HTML-content elements
+  var emptyHelp = document.getElementById('emptyHelp');
+  if(emptyHelp) emptyHelp.innerHTML = t('noDataHelp');
+  var uploadHelp = document.getElementById('uploadHelp');
+  if(uploadHelp) uploadHelp.innerHTML = t('dropHelp');
+  var markerLegend = document.getElementById('markerLegend');
+  if(markerLegend) markerLegend.innerHTML = t('markerColor');
+  var mapNote = document.getElementById('mapNote');
+  if(mapNote) mapNote.textContent = t('mapNote');
+  // Re-render dynamic content if data exists
+  if(state.meters && state.meters.length) {
+    renderStats();
+    renderTable();
+    renderMap();
+    showResults();
+    renderSortIndicators();
+  }
+}
+
+function loadLanguage(){
+  try{
+    var saved = localStorage.getItem('cs_outages_lang');
+    if(saved && I18N[saved]) state.lang = saved;
+  }catch(e){}
+}
+function saveLanguage(){
+  try{ localStorage.setItem('cs_outages_lang', state.lang); }catch(e){}
+}
+
+loadLanguage();
+document.getElementById('langSwitch').value = state.lang;
+refreshLanguage();
+var map = null;
+var markersLayer = null;
+var markerByKey = {};
+
+// ── Crypto (matches main app: AES-GCM + PBKDF2-SHA256, 250000 iter) ──────
+var ENCRYPTED_ENVELOPE_SCHEMA = 'outageCalc_encrypted_v1';
+var ENCRYPTION_KDF_ITERATIONS = 250000;
+var pendingEnvelope = null;
+var pendingFilename = '';
+
+function hasCryptoSupport(){
+  return !!(window.crypto && window.crypto.subtle && window.TextEncoder && window.TextDecoder);
+}
+function isEncryptedEnvelope(v){
+  return !!(v && typeof v === 'object' && v.schema === ENCRYPTED_ENVELOPE_SCHEMA && v.version === 1 && v.iv && v.ciphertext);
+}
+function base64ToBytes(b64){
+  var bin = atob(b64), bytes = new Uint8Array(bin.length);
+  for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function bytesToBase64(bytes){
+  var bin = '';
+  for(var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+async function deriveSecretKey(secret, salt){
+  var enc = new TextEncoder();
+  var baseKey = await crypto.subtle.importKey('raw', enc.encode(String(secret || '')), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: salt, iterations: ENCRYPTION_KDF_ITERATIONS, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+}
+async function decryptPayloadWithSecret(envelope, secret){
+  if(!isEncryptedEnvelope(envelope)) throw new Error('Invalid encrypted payload');
+  var key = await deriveSecretKey(secret, base64ToBytes(envelope.salt));
+  var plain = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: base64ToBytes(envelope.iv) },
+    key,
+    base64ToBytes(envelope.ciphertext)
+  );
+  return JSON.parse(new TextDecoder().decode(new Uint8Array(plain)));
+}
+
+// ── Local non-exportable cache key ───────────────────────────────────────
+var IDB_NAME = 'cs_outages_db';
+var IDB_STORE = 'kv';
+var IDB_CACHE_KEY = 'lastPayload';
+var IDB_LOCAL_KEY = 'localCryptoKey';
+var CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 dagar
+var idbPromise = null;
+var cacheTouchTimer = null;
+function idbOpen(){
+  if(idbPromise) return idbPromise;
+  idbPromise = new Promise(function(res, rej){
+    try{
+      var req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = function(){ req.result.createObjectStore(IDB_STORE); };
+      req.onsuccess = function(){ res(req.result); };
+      req.onerror = function(){ rej(req.error); };
+    }catch(e){ rej(e); }
+  });
+  return idbPromise;
+}
+function idbSet(key, val){
+  return idbOpen().then(function(db){
+    return new Promise(function(res, rej){
+      var tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(val, key);
+      tx.oncomplete = function(){ res(); };
+      tx.onerror = function(){ rej(tx.error); };
+    });
+  });
+}
+function idbGet(key){
+  return idbOpen().then(function(db){
+    return new Promise(function(res, rej){
+      var tx = db.transaction(IDB_STORE, 'readonly');
+      var r = tx.objectStore(IDB_STORE).get(key);
+      r.onsuccess = function(){ res(r.result); };
+      r.onerror = function(){ rej(r.error); };
+    });
+  });
+}
+function idbDel(key){
+  return idbOpen().then(function(db){
+    return new Promise(function(res){
+      var tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).delete(key);
+      tx.oncomplete = function(){ res(); };
+      tx.onerror = function(){ res(); };
+    });
+  });
+}
+async function getLocalKey(){
+  var key = await idbGet(IDB_LOCAL_KEY);
+  if(key) return key;
+  key = await crypto.subtle.generateKey(
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+  await idbSet(IDB_LOCAL_KEY, key);
+  return key;
+}
+async function encryptCachePayload(payload, key){
+  var iv = new Uint8Array(12);
+  crypto.getRandomValues(iv);
+  var enc = new TextEncoder();
+  var ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv },
+    key,
+    enc.encode(JSON.stringify(payload))
+  );
+  return {
+    iv: bytesToBase64(iv),
+    ciphertext: bytesToBase64(new Uint8Array(ciphertext))
+  };
+}
+async function decryptCachePayload(envelope, key){
+  var iv = base64ToBytes(envelope.iv);
+  var ciphertext = base64ToBytes(envelope.ciphertext);
+  var plain = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv },
+    key,
+    ciphertext
+  );
+  return JSON.parse(new TextDecoder().decode(new Uint8Array(plain)));
+}
+async function saveCache(payload, filename){
+  try{
+    var key = await getLocalKey();
+    var encrypted = await encryptCachePayload(payload, key);
+    await idbSet(IDB_CACHE_KEY, { filename: filename, encryptedPayload: encrypted, savedAt: Date.now() });
+  }catch(e){
+    console.error('saveCache failed:', e);
+  }
+}
+function touchCacheExpiry(){
+  if(!state.cachePayload || !state.meters.length) return;
+  state.cacheSavedAt = Date.now();
+  renderFileMeta();
+  clearTimeout(cacheTouchTimer);
+  cacheTouchTimer = setTimeout(function(){
+    cacheTouchTimer = null;
+    saveCache(state.cachePayload, state.filename);
+  }, 250);
+}
+async function loadCache(){
+  try{
+    var entry = await idbGet(IDB_CACHE_KEY);
+    if(!entry) return null;
+    if(typeof entry.savedAt === 'number' && (Date.now() - entry.savedAt) > CACHE_TTL_MS){
+      await idbDel(IDB_CACHE_KEY);
+      return null;
+    }
+    // Gammal klartext-cache – rensa automatiskt
+    if(entry.payload){
+      await idbDel(IDB_CACHE_KEY);
+      return null;
+    }
+    if(!entry.encryptedPayload) return null;
+    var key = await getLocalKey();
+    var payload = await decryptCachePayload(entry.encryptedPayload, key);
+    return { payload: payload, filename: entry.filename || '', savedAt: entry.savedAt || 0 };
+  }catch(e){
+    console.error('loadCache failed:', e);
+    toast(t('cacheOpenError'));
+    return null;
+  }
+}
+function clearCache(){ return idbDel(IDB_CACHE_KEY); }
+
+// ── Toast ────────────────────────────────────────────────────────────────
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+// ── Formatters ───────────────────────────────────────────────────────────
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmtDt(ms){
+  if(ms == null) return '—';
+  var d = new Date(ms);
+  return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad2(d.getHours())+':'+pad2(d.getMinutes());
+}
+function fmtDur(ms){
+  if(ms == null || ms < 0) return '—';
+  var totalS = Math.floor(ms/1000), s = totalS%60, m = Math.floor(totalS/60)%60;
+  var h = Math.floor(totalS/3600)%24, d = Math.floor(totalS/86400);
+  if(d > 0) return d+'d '+h+'h '+m+'m';
+  if(h > 0) return h+'h '+m+'m';
+  if(m > 0) return m+'m '+s+'s';
+  return s+'s';
+}
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function meterKeyOf(m){ return (m.placeId||'') + '|' + (m.meterId||''); }
+function getCompPct(durationMs){
+  if(durationMs == null || durationMs < 0) return 0;
+  var h = durationMs / 3600000;
+  if(h < 12) return 0;
+  if(h < 24) return 10;
+  if(h < 48) return 25;
+  if(h < 72) return 50;
+  if(h < 120) return 100;
+  if(h < 288) return 150;
+  return 200;
+}
+function getDurationTierColor(durationMs){
+  if(durationMs == null) return '#e2e8f0';
+  var h = durationMs / 3600000;
+  if(h < 12) return '#94a3b8';
+  if(h < 24) return '#facc15';
+  if(h < 48) return '#f59e0b';
+  if(h < 72) return '#f97316';
+  if(h < 120) return '#ef4444';
+  if(h < 288) return '#b91c1c';
+  return '#4c0519';
+}
+function pctBadge(durationMs){
+  return pctBadgeFromPct(getCompPct(durationMs));
+}
+function pctBadgeFromPct(pct){
+  var n = pct == null || isNaN(pct) ? 0 : Math.max(0, Math.round(pct));
+  var cls = n === 0 ? 'seg-badge seg-badge-pct-zero' : 'seg-badge seg-badge-pct';
+  return '<span class="' + cls + '">' + n + '%</span>';
+}
+function getRowCompensationSegments(row){
+  if(!row) return [];
+  if(Array.isArray(row.compensationSegments) && row.compensationSegments.length){
+    return row.compensationSegments.slice();
+  }
+  var d = calcRowDuration(row);
+  if(d == null || d < 12 * 3600000) return [];
+  return [{
+    start: row.start != null ? row.start : null,
+    end: row.end != null ? row.end : null,
+    hours: d / 3600000,
+    pct: getCompPct(d),
+    amount: row.compensationTotalAmount != null ? row.compensationTotalAmount : null
+  }];
+}
+function getPctSummaryHtml(segments){
+  if(!segments || !segments.length) return '';
+  var html = '';
+  for(var i = 0; i < segments.length; i++){
+    if(i) html += '<span class="pct-plus">+</span>';
+    html += pctBadgeFromPct(segments[i] && segments[i].pct != null ? segments[i].pct : 0);
+  }
+  return html;
+}
+function getMeterPctSummary(m){
+  if(!m) return '';
+  var rows = Array.isArray(m.outageRows) && m.outageRows.length ? m.outageRows : null;
+  var segs = [];
+  if(rows){
+    for(var i = 0; i < rows.length; i++){
+      var rowSegs = getRowCompensationSegments(rows[i]);
+      if(rowSegs.length){
+        segs = segs.concat(rowSegs);
+        continue;
+      }
+      var d = calcRowDuration(rows[i]);
+      if(d == null || d < 12 * 3600000) continue;
+      segs.push({ pct: getCompPct(d) });
+    }
+  }
+  if(!segs.length){
+    var primary = m.primaryDuration != null ? m.primaryDuration : null;
+    if(primary == null || primary < 12 * 3600000) return '';
+    segs.push({ pct: getCompPct(primary) });
+  }
+  return getPctSummaryHtml(segs);
+}
+function calcRowDuration(row){
+  if(!row) return null;
+  if(row.duration != null && row.duration >= 0) return row.duration;
+  if(row.start != null && row.end != null && row.end >= row.start) return row.end - row.start;
+  return null;
+}
+function getRowBaseEnd(row){
+  if(!row) return null;
+  if(row.baseEnd != null) return row.baseEnd;
+  var segs = row.segments || [];
+  var maxEnd = null;
+  for(var i = 0; i < segs.length; i++){
+    if(segs[i] && segs[i].end != null && (maxEnd == null || segs[i].end > maxEnd)) maxEnd = segs[i].end;
+  }
+  return maxEnd;
+}
+function rowHasFaultExtension(row){
+  if(!row) return false;
+  if(row.faultEnd != null && row.baseEnd != null && row.faultEnd > row.baseEnd) return true;
+  var baseEnd = getRowBaseEnd(row);
+  return baseEnd != null && row.end != null && row.end > baseEnd + 60000;
+}
+
+// ── Loading ──────────────────────────────────────────────────────────────
+function handleFile(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      handleParsedFile(data, file.name);
+    }catch(err){
+      toast(t('parseError') + err.message);
+    }
+  };
+  reader.onerror = function(){ toast(t('readError')); };
+  reader.readAsText(file);
+}
+async function handleParsedFile(data, filename){
+  if(isEncryptedEnvelope(data)){
+    if(!hasCryptoSupport()){ toast(t('browserNoCrypto')); return; }
+    pendingEnvelope = data;
+    pendingFilename = filename || '';
+    showUnlockModal();
+    return;
+  }
+  ingest(data, filename);
+}
+function ingest(data, filename, opts){
+  if(!data || data.schema !== 'power-outage-customer-service'){
+    toast(t('wrongFormat'));
+    return;
+  }
+  var meters = (data.meters || []).filter(function(m){ return m && m.primaryStart != null; });
+  // Normalise: when outageRows is present, recompute primaryStart/End/Duration from
+  // qualifying rows (≥12h) so table columns and headers always show the full range,
+  // regardless of which export version produced the file.
+  var _QUAL_MS = 12 * 3600000;
+  meters.forEach(function(m){
+    if(!Array.isArray(m.outageRows) || !m.outageRows.length) return;
+    m.outageRows.forEach(function(r){
+      var d = calcRowDuration(r);
+      if(r.duration == null && d != null) r.duration = d;
+      if(r.faultEnd != null && (r.end == null || r.faultEnd > r.end)) r.end = r.faultEnd;
+    });
+    var qr = m.outageRows.filter(function(r){ return calcRowDuration(r) != null && calcRowDuration(r) >= _QUAL_MS; });
+    if(!qr.length) return;
+    qr.sort(function(a,b){ return (a.start||0) - (b.start||0); });
+    m.primaryStart = qr[0].start;
+    m.primaryEnd   = qr[qr.length-1].end;
+    m.primaryDuration = qr.reduce(function(s,r){ return s + (calcRowDuration(r)||0); }, 0);
+  });
+  state.meters = meters;
+  state.exportedAt = data.exportedAt || '';
+  state.filename = filename || '';
+  state.cachePayload = data;
+  var fromCache = !!(opts && opts.fromCache);
+  state.cacheSavedAt = Date.now();
+  saveCache(data, filename);
+  showResults();
+  applyFilters();
+  toast(fromCache
+    ? t('restored', {n: meters.length})
+    : t('loaded', {n: meters.length}));
+}
+function clearData(){
+  state.meters = [];
+  state.filtered = [];
+  state.selectedKey = null;
+  state.cacheSavedAt = 0;
+  state.cachePayload = null;
+  clearTimeout(cacheTouchTimer);
+  cacheTouchTimer = null;
+  clearCache();
+  document.getElementById('resultsView').style.display = 'none';
+  document.getElementById('emptyState').style.display = '';
+  document.getElementById('clearBtn').style.display = 'none';
+  document.getElementById('uploadCard').classList.add('compact');
+  document.getElementById('uploadZone').classList.add('compact');
+  document.getElementById('fileMeta').innerHTML = '';
+  toast(t('cleared'));
+}
+
+// ── Unlock modal ─────────────────────────────────────────────────────────
+function showUnlockModal(){
+  var modal = document.getElementById('unlockModal');
+  var input = document.getElementById('unlockKeyInput');
+  var status = document.getElementById('unlockStatus');
+  if(status) status.textContent = '';
+  if(input){
+    input.value = '';
+    input.disabled = false;
+  }
+  var btn = document.getElementById('unlockSubmitBtn');
+  if(btn) btn.disabled = false;
+  modal.style.display = 'flex';
+  setTimeout(function(){ if(input) input.focus(); }, 50);
+}
+function hideUnlockModal(){
+  document.getElementById('unlockModal').style.display = 'none';
+}
+function cancelUnlock(){
+  pendingEnvelope = null;
+  pendingFilename = '';
+  hideUnlockModal();
+}
+async function submitUnlock(){
+  var input = document.getElementById('unlockKeyInput');
+  var status = document.getElementById('unlockStatus');
+  var btn = document.getElementById('unlockSubmitBtn');
+  var secret = input.value.trim();
+  if(!secret){ status.textContent = t('enterKey'); return; }
+  if(!pendingEnvelope){ hideUnlockModal(); return; }
+  btn.disabled = true;
+  input.disabled = true;
+  status.style.color = '';
+  status.textContent = t('decrypting');
+  try{
+    var payload = await decryptPayloadWithSecret(pendingEnvelope, secret);
+    var fname = pendingFilename;
+    pendingEnvelope = null;
+    pendingFilename = '';
+    hideUnlockModal();
+    ingest(payload, fname);
+  }catch(err){
+    btn.disabled = false;
+    input.disabled = false;
+    status.style.color = 'var(--danger)';
+    status.textContent = t('wrongKey');
+    input.focus();
+    input.select();
+  }
+}
+function showResults(){
+  document.getElementById('resultsView').style.display = '';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('clearBtn').style.display = '';
+  document.getElementById('uploadCard').classList.add('compact');
+  document.getElementById('uploadZone').classList.add('compact');
+  var meta = '<strong>' + esc(state.filename || 'data') + '</strong>'
+    + '<span>' + state.meters.length + ' ' + esc(t('matareUnit')) + '</span>'
+    + (state.exportedAt ? '<span>' + esc(t('exported')) + ': ' + esc(new Date(state.exportedAt).toLocaleString(state.lang + '-SE')) + '</span>' : '')
+    + (state.cacheSavedAt ? '<span title="' + esc(t('cacheExpired')) + '">' + esc(t('savedLocally')) + ': ' + esc(new Date(state.cacheSavedAt).toLocaleString(state.lang + '-SE'))
+         + ' · ' + esc(t('expiresIn')) + ' ' + esc(fmtDaysLeft(state.cacheSavedAt)) + '</span>' : '');
+  renderFileMeta();
+  ensureMap();
+}
+function fmtDaysLeft(savedAt){
+  var msLeft = Math.max(0, CACHE_TTL_MS - (Date.now() - savedAt));
+  var days = Math.floor(msLeft / (24*60*60*1000));
+  var hours = Math.floor((msLeft % (24*60*60*1000)) / (60*60*1000));
+  if(days >= 1) return days + ' ' + t('daysShort') + ' ' + hours + ' ' + t('hoursShort');
+  return hours + ' ' + t('hoursShort');
+}
+
+// ── Filtering / sorting ──────────────────────────────────────────────────
+function buildFileMetaHtml(){
+  return '<strong>' + esc(state.filename || 'data') + '</strong>'
+    + '<span>' + state.meters.length + ' ' + esc(t('matareUnit')) + '</span>'
+    + (state.exportedAt ? '<span>' + esc(t('exported')) + ': ' + esc(new Date(state.exportedAt).toLocaleString(state.lang + '-SE')) + '</span>' : '')
+    + (state.cacheSavedAt ? '<span title="' + esc(t('cacheExpired')) + '">' + esc(t('savedLocally')) + ': ' + esc(new Date(state.cacheSavedAt).toLocaleString(state.lang + '-SE'))
+         + ' · ' + esc(t('expiresIn')) + ' ' + esc(fmtDaysLeft(state.cacheSavedAt)) + '</span>' : '');
+}
+function renderFileMeta(){
+  var el = document.getElementById('fileMeta');
+  if(el) el.innerHTML = buildFileMetaHtml();
+}
+function getFilters(){
+  return {
+    text: (document.getElementById('searchInput').value || '').toLowerCase().trim(),
+    source: document.getElementById('sourceFilter').value,
+    minH: parseFloat(document.getElementById('minDur').value),
+    maxH: parseFloat(document.getElementById('maxDur').value)
+  };
+}
+function applyFilters(){
+  var f = getFilters();
+  var rows = state.meters.filter(function(m){
+    if(f.source && m.source !== f.source) return false;
+    if(!isNaN(f.minH) && (m.primaryDuration||0)/3600000 < f.minH) return false;
+    if(!isNaN(f.maxH) && (m.primaryDuration||0)/3600000 > f.maxH) return false;
+    if(f.text){
+      var hay = (m.meterId+' '+m.placeId+' '+m.transformer+' '+m.connection+' '+m.street+' '+m.amrSystem).toLowerCase();
+      if(hay.indexOf(f.text) === -1) return false;
+    }
+    return true;
+  });
+  rows.sort(function(a,b){
+    var col = state.sortCol;
+    var va = a[col], vb = b[col];
+    if(va == null) va = (typeof vb === 'number' ? -Infinity : '');
+    if(vb == null) vb = (typeof va === 'number' ? -Infinity : '');
+    var cmp = (typeof va === 'number' && typeof vb === 'number')
+      ? (va - vb)
+      : String(va).localeCompare(String(vb), state.lang, { numeric:true });
+    return state.sortDir === 'asc' ? cmp : -cmp;
+  });
+  state.filtered = rows;
+  renderTable();
+  renderMap();
+  document.getElementById('rowCount').textContent = rows.length + ' / ' + state.meters.length + ' ' + t('matareUnit');
+  renderStats();
+  renderSortIndicators();
+  touchCacheExpiry();
+}
+function resetFilters(){
+  document.getElementById('searchInput').value = '';
+  document.getElementById('sourceFilter').value = '';
+  document.getElementById('minDur').value = '';
+  document.getElementById('maxDur').value = '';
+  applyFilters();
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────
+function renderStats(){
+  var rows = state.filtered;
+  var total = rows.length, amr = 0, dms = 0, man = 0, withCoords = 0;
+  var maxDur = 0, sumDur = 0;
+  for(var i = 0; i < rows.length; i++){
+    var r = rows[i];
+    if(r.source === 'AMR') amr++;
+    else if(r.source === 'DMS') dms++;
+    else if(r.source === 'MAN') man++;
+    if(r.lat != null && r.lon != null) withCoords++;
+    var d = r.primaryDuration || 0;
+    if(d > maxDur) maxDur = d;
+    sumDur += d;
+  }
+  var avg = total ? sumDur / total : 0;
+  var html = ''
+    + '<div class="stat"><div class="lbl">' + esc(t('metersWithOutage')) + '</div><div class="val">' + total + '</div><div class="sub">' + withCoords + ' ' + esc(t('withMap')) + '</div></div>'
+    + '<div class="stat amr"><div class="lbl">AMR</div><div class="val">' + amr + '</div><div class="sub">' + esc(t('finalSelected')) + '</div></div>'
+    + '<div class="stat dms"><div class="lbl">DMS</div><div class="val">' + dms + '</div><div class="sub">' + esc(t('finalSelected')) + '</div></div>'
+    + '<div class="stat man"><div class="lbl">MAN</div><div class="val">' + man + '</div><div class="sub">' + esc(t('manuallySelected')) + '</div></div>'
+    + '<div class="stat"><div class="lbl">' + esc(t('longestOutage')) + '</div><div class="val mono" style="font-size:1rem">' + fmtDur(maxDur) + '</div></div>'
+    + '<div class="stat"><div class="lbl">' + esc(t('average')) + '</div><div class="val mono" style="font-size:1rem">' + fmtDur(avg) + '</div></div>';
+  document.getElementById('statsStrip').innerHTML = html;
+}
+
+// ── Table ────────────────────────────────────────────────────────────────
+function sourcePill(m){
+  var cls = 'pill pill-' + m.source.toLowerCase();
+  return '<span class="' + cls + '">' + esc(m.source) + '</span>';
+}
+var TABLE_ROW_CAP = 400;
+function renderTable(){
+  var rows = state.filtered;
+  var body = document.getElementById('meterBody');
+  if(!rows.length){
+    body.innerHTML = '<tr><td colspan="10" class="empty">' + esc(t('noMetersMatch')) + '</td></tr>';
+    return;
+  }
+  var limit = Math.min(rows.length, TABLE_ROW_CAP);
+  var html = '';
+  for(var i = 0; i < limit; i++){
+    var m = rows[i];
+    var key = meterKeyOf(m);
+    var isSel = state.selectedKey === key;
+    var pctSummary = getMeterPctSummary(m);
+    html += '<tr class="main' + (isSel ? ' selected' : '') + '" data-key="' + esc(key) + '">'
+      + '<td><strong>' + esc(m.meterId || '—') + '</strong></td>'
+      + '<td>' + esc(m.placeId || '—') + '</td>'
+      + '<td>' + esc(m.transformer || '—') + '</td>'
+      + '<td>' + esc(m.connection || '—') + '</td>'
+      + '<td>' + esc(m.street || '—') + '</td>'
+      + '<td class="src-' + esc(m.source) + '">' + sourcePill(m) + '</td>'
+      + '<td class="mono">' + esc(fmtDt(m.primaryStart)) + '</td>'
+      + '<td class="mono">' + esc(fmtDt(m.primaryEnd)) + '</td>'
+      + '<td class="dur mono dur-cell"><div class="dur-main"><span>' + esc(fmtDur(m.primaryDuration)) + '</span>'
+      + (pctSummary ? '<span class="pct-summary">' + pctSummary + '</span>' : '')
+      + '</div></td>'
+      + '<td class="mono">' + (m.outageCount || 1) + '</td>'
+      + '</tr>';
+    if(isSel){
+      html += '<tr class="detail"><td colspan="10">' + renderDetailHtml(m) + '</td></tr>';
+    }
+  }
+  if(rows.length > limit){
+    html += '<tr><td colspan="10" style="text-align:center;padding:.7rem;color:var(--muted);font-size:.8rem">'
+         + esc(t('showingFirst', {limit: limit, total: rows.length}))
+         + '</td></tr>';
+  }
+  body.innerHTML = html;
+}
+function renderDetailHtml(m){
+  var segs = m.segments || [];
+  var outageRows = Array.isArray(m.outageRows) && m.outageRows.length ? m.outageRows : null;
+  var SHORT_MS = 3 * 60 * 1000;
+  var QUAL_MS = 12 * 3600000;
+
+  function segStatus(seg){
+    var d = (seg.start != null && seg.end != null) ? (seg.end - seg.start) : null;
+    return (d != null && d < SHORT_MS) ? 'ignored' : 'counted';
+  }
+
+  var html = '<div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start">';
+
+  // ── Left column: final choice ────────────────────────────────────────
+  html += '<div style="min-width:240px">'
+    + '<div class="muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600">' + esc(t('finalChoice')) + '</div>'
+    + '<div style="margin-top:.2rem">' + sourcePill(m) + '</div>'
+    + '<div class="muted" style="margin-top:.4rem;font-size:.78rem">'
+    + esc(t('amrSystem')) + ': ' + esc(m.amrSystem || '—')
+    + (m.consumption ? '<br>' + esc(t('consumption')) + ': ' + esc(m.consumption) : '')
+    + '</div></div>';
+
+  // ── Right column ─────────────────────────────────────────────────────
+  html += '<div style="flex:1;min-width:300px">';
+  html += '<div class="muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:.3rem">'
+    + esc(t('outagePeriods')) + ' (' + segs.length + ')</div>';
+
+  if(outageRows){
+
+    // Aggregate counted-window box: first qualifying start → last qualifying end, all % badges
+    if(m.primaryStart != null && m.primaryEnd != null){
+      html += '<div class="counted-win">'
+        + '<span class="counted-win-lbl">' + esc(t('countedWindow')) + '</span>'
+        + '<span class="counted-win-range mono">' + esc(fmtDt(m.primaryStart)) + ' &rarr; ' + esc(fmtDt(m.primaryEnd)) + '</span>'
+        + '<span class="counted-win-dur dur">' + esc(fmtDur(m.primaryDuration)) + '</span>'
+        + pctBadge(m.primaryDuration)
+        + '</div>';
+    }
+
+    // Compensation tier breakdown — one row per outage row
+    html += '<div class="comp-breakdown"><div class="comp-breakdown-hdr">' + esc(t('compensationPeriods')) + '</div>';
+    var globalIdx = 0;
+    for(var ri = 0; ri < outageRows.length; ri++){
+      var row = outageRows[ri];
+      var rowDuration = calcRowDuration(row);
+      var isQual = rowDuration != null && rowDuration >= QUAL_MS;
+      var color = getDurationTierColor(rowDuration);
+      var hasMulti = row.segments && row.segments.length > 1;
+      var hasFault = rowHasFaultExtension(row);
+      var compSegments = getRowCompensationSegments(row);
+      html += '<div class="outage-group' + (isQual ? '' : ' comp-row-zero') + (hasFault ? ' comp-row-fault' : '') + '"><div class="comp-row">'
+        + '<span class="comp-dot" style="background:' + esc(color) + '"></span>'
+        + '<span class="seg-num">#' + (ri + 1) + '</span>'
+        + '<span class="comp-row-range mono">' + esc(fmtDt(row.start)) + ' &rarr; ' + esc(fmtDt(row.end)) + '</span>'
+        + '<span class="comp-row-dur dur">' + esc(fmtDur(rowDuration)) + '</span>'
+        + (compSegments.length > 1 ? getPctSummaryHtml(compSegments) : (isQual ? pctBadge(rowDuration) : '<span class="seg-badge seg-badge-ignored">' + esc(t('noCompUnder12h')) + '</span>'))
+        + (hasFault ? '<span class="fault-note">' + esc(t('faultExtended')) + '</span>' : '')
+        + '</div>';
+      if(row.segments && row.segments.length){
+        html += '<div class="group-note">' + row.segments.length + ' ' + esc(t(row.segments.length === 1 ? 'interruption' : 'interruptions'))
+          + (isQual ? ' - ' + esc(t('includedInCalculatedOutage')) : ' - ' + esc(t('noCompUnder12h')))
+          + (hasFault && getRowBaseEnd(row) != null ? ' - ' + esc(t('normalEnd')) + ' ' + esc(fmtDt(getRowBaseEnd(row))) : '')
+          + '</div>';
+      }
+      if(compSegments.length > 1){
+        html += '<div class="comp-split-list"><div class="comp-breakdown-hdr" style="margin:.1rem 0 .15rem">' + esc(t('compSplitTitle')) + '</div>';
+        for(var ci = 0; ci < compSegments.length; ci++){
+          var cs = compSegments[ci];
+          var csStart = cs && cs.start != null ? new Date(cs.start) : null;
+          var csEnd = cs && cs.end != null ? new Date(cs.end) : null;
+          var csDur = (csStart && csEnd && csEnd >= csStart) ? (csEnd.getTime() - csStart.getTime()) : null;
+          html += '<div class="comp-split-row">'
+            + '<span class="comp-split-num">#' + (ci + 1) + '</span>'
+            + '<span class="mono">' + esc(fmtDt(csStart ? csStart.getTime() : null)) + ' &rarr; ' + esc(fmtDt(csEnd ? csEnd.getTime() : null)) + '</span>'
+            + '<span class="dur">' + esc(fmtDur(csDur)) + '</span>'
+            + pctBadgeFromPct(cs && cs.pct != null ? cs.pct : 0)
+            + '</div>';
+        }
+        html += '</div>';
+      }
+      // Sub-intervals only for AMR rows that have multiple segments
+      if(hasMulti){
+        html += '<div class="seg-list seg-list-sub">';
+        for(var si = 0; si < row.segments.length; si++){
+          var s = row.segments[si];
+          var st = segStatus(s);
+          var d = (s.start != null && s.end != null) ? (s.end - s.start) : null;
+          html += '<div class="seg">'
+            + '<span class="seg-num">#' + (globalIdx + 1) + '</span>'
+            + '<span class="mono">' + esc(fmtDt(s.start)) + ' &rarr; ' + esc(s.end != null ? fmtDt(s.end) : t('ongoing')) + '</span>'
+            + '<span class="seg-meta dur">' + esc(d != null ? fmtDur(d) : '—') + '</span>'
+            + (st === 'counted'
+                ? '<span class="seg-badge seg-badge-counted">' + esc(t('countedSeg')) + '</span>'
+                : '<span class="seg-badge seg-badge-ignored">' + esc(t('ignoredShortSeg')) + '</span>')
+            + '</div>';
+          globalIdx++;
+        }
+        html += '</div>';
+      } else {
+        globalIdx += row.segments ? row.segments.length : 0;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+
+  } else {
+    // Fallback for old exports: single counted-window header + flat segments with per-segment %
+    if(m.primaryStart != null && m.primaryEnd != null){
+      html += '<div class="counted-win">'
+        + '<span class="counted-win-lbl">' + esc(t('countedWindow')) + '</span>'
+        + '<span class="counted-win-range mono">' + esc(fmtDt(m.primaryStart)) + ' &rarr; ' + esc(fmtDt(m.primaryEnd)) + '</span>'
+        + '<span class="counted-win-dur dur">' + esc(fmtDur(m.primaryDuration)) + '</span>'
+        + pctBadge(m.primaryDuration)
+        + '</div>';
+    }
+    if(!segs.length){
+      html += '<div class="muted" style="margin-top:.3rem">' + esc(t('noSegmentData')) + '</div>';
+    } else {
+      html += '<div class="seg-list">';
+      for(var i = 0; i < segs.length; i++){
+        var s = segs[i];
+        var d = (s.start != null && s.end != null) ? (s.end - s.start) : null;
+        var st = segStatus(s);
+        html += '<div class="seg">'
+          + '<span class="seg-num">#' + (i + 1) + '</span>'
+          + '<span class="mono">' + esc(fmtDt(s.start)) + ' &rarr; ' + esc(s.end != null ? fmtDt(s.end) : t('ongoing')) + '</span>'
+          + '<span class="seg-meta dur">' + esc(d != null ? fmtDur(d) : '—') + '</span>'
+          + (st === 'counted'
+              ? '<span class="seg-badge seg-badge-counted">' + esc(t('countedSeg')) + '</span>'
+              : '<span class="seg-badge seg-badge-ignored">' + esc(t('ignoredShortSeg')) + '</span>')
+          + '</div>';
+      }
+      html += '</div>';
+    }
+  }
+
+  html += '<div style="margin-top:.5rem" class="muted">'
+    + esc(t('total')) + ': <strong class="dur">' + esc(fmtDur(m.totalDuration)) + '</strong>'
+    + ' (' + esc(t('sumAllPeriods')) + ') &middot; '
+    + '<strong>' + esc(t('primaryLength')) + '</strong>: <strong class="dur">' + esc(fmtDur(m.primaryDuration)) + '</strong>'
+    + '</div>';
+  html += '</div>';
+  if(m.lat != null && m.lon != null){
+    html += '<div><button class="btn btn-ghost" onclick="zoomToMeter(\'' + esc(meterKeyOf(m)) + '\')">&#128270; ' + esc(t('zoomMap')) + '</button></div>';
+  }
+  html += '</div>';
+  return html;
+}
+function renderSortIndicators(){
+  var ths = document.querySelectorAll('#meterTable thead th');
+  for(var i = 0; i < ths.length; i++){
+    var col = ths[i].getAttribute('data-col');
+    var ind = ths[i].querySelector('.sort-i');
+    if(!ind) continue;
+    ind.textContent = (col === state.sortCol) ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
+  }
+}
+
+// ── Map (canvas renderer + circleMarker + marker clustering) ────────────
+var canvasRenderer = null;
+function ensureMap(){
+  if(map) return;
+  canvasRenderer = L.canvas({ padding: 0.5 });
+  map = L.map('map', { zoomControl: true, preferCanvas: true, renderer: canvasRenderer }).setView([63.5, 23.0], 8);
+  L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors &middot; Tiles: openstreetmap.de'
+  }).addTo(map);
+  if(typeof L.markerClusterGroup === 'function'){
+    markersLayer = L.markerClusterGroup({
+      chunkedLoading: true,
+      chunkInterval: 80,
+      chunkDelay: 20,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: false,
+      disableClusteringAtZoom: 11,
+      maxClusterRadius: 35,
+      iconCreateFunction: function(cluster){
+        var n = cluster.getChildCount();
+        var size = n < 10 ? 30 : n < 100 ? 36 : n < 1000 ? 44 : 52;
+        return L.divIcon({
+          html: '<div class="cs-cluster" style="width:' + size + 'px;height:' + size + 'px">' + n + '</div>',
+          className: '',
+          iconSize: [size, size]
+        });
+      }
+    });
+    map.addLayer(markersLayer);
+  } else {
+    markersLayer = L.layerGroup().addTo(map);
+  }
+}
+function colorForSource(src){
+  if(src === 'AMR') return '#10b981';
+  if(src === 'DMS') return '#06b6d4';
+  if(src === 'MAN') return '#f59e0b';
+  return '#64748b';
+}
+function getDurationTiers(){
+  return [
+    { max: 6, label: '<6h (0%)', fill: '#bbf7d0' },
+    { max: 12, label: '6-12h (0%)', fill: '#22c55e' },
+    { max: 24, label: '12-24h (10%)', fill: '#facc15' },
+    { max: 48, label: '24-48h (25%)', fill: '#f59e0b' },
+    { max: 72, label: '48-72h (50%)', fill: '#f97316' },
+    { max: 120, label: '72-120h (100%)', fill: '#ef4444' },
+    { max: 288, label: '120-288h (150%)', fill: '#b91c1c' },
+    { max: Infinity, label: '>288h (200%)', fill: '#4c0519' }
+  ];
+}
+function getDurationColor(ms){
+  if(ms == null || ms < 0) return '#e2e8f0';
+  var h = ms / 3600000;
+  var tiers = getDurationTiers();
+  for(var i = 0; i < tiers.length; i++){
+    if(h < tiers[i].max) return tiers[i].fill;
+  }
+  return tiers[tiers.length - 1].fill;
+}
+function renderDurationLegend(){
+  var tiers = getDurationTiers();
+  var html = '';
+  for(var i = 0; i < tiers.length; i++){
+    html += '<span class="tier"><span class="tier-dot" style="background:' + tiers[i].fill + '"></span>' + esc(tiers[i].label) + '</span>';
+  }
+  document.getElementById('durationLegend').innerHTML = html;
+}
+function renderMap(){
+  if(!map) return;
+  markersLayer.clearLayers();
+  markerByKey = {};
+  var rows = state.filtered;
+  var bounds = [];
+  var batch = [];
+  for(var i = 0; i < rows.length; i++){
+    var m = rows[i];
+    if(m.lat == null || m.lon == null) continue;
+    var key = meterKeyOf(m);
+    var srcColor = colorForSource(m.source);
+    var durColor = getDurationColor(m.primaryDuration);
+    var marker = L.circleMarker([m.lat, m.lon], {
+      renderer: canvasRenderer,
+      radius: 6,
+      weight: 2.5,
+      color: srcColor,
+      fillColor: durColor,
+      fillOpacity: 0.92
+    });
+    marker._meter = m;
+    marker._meterKey = key;
+    marker.on('click', onMarkerClick);
+    batch.push(marker);
+    markerByKey[key] = marker;
+    bounds.push([m.lat, m.lon]);
+  }
+  if(typeof markersLayer.addLayers === 'function'){
+    markersLayer.addLayers(batch);
+  } else {
+    for(var j = 0; j < batch.length; j++) markersLayer.addLayer(batch[j]);
+  }
+  if(bounds.length && bounds.length <= state.meters.length){
+    try{ map.fitBounds(bounds, { padding: [20,20], maxZoom: 13 }); }catch(e){}
+  }
+  renderDurationLegend();
+}
+function onMarkerClick(e){
+  var marker = e.target;
+  var m = marker._meter;
+  if(!marker.getPopup()){
+    marker.bindPopup(renderPopupHtml(m));
+  }
+  marker.openPopup();
+  selectMeter(marker._meterKey, false);
+}
+function renderPopupHtml(m){
+  return '<div class="marker-popup">'
+    + '<strong>' + esc(m.meterId || m.placeId || t('meter2')) + '</strong>'
+    + (m.street ? esc(m.street) + '<br>' : '')
+    + esc(t('source2')) + ': <span class="src-' + esc(m.source) + '"><strong>' + esc(m.source) + '</strong></span><br>'
+    + esc(t('outage')) + ': <strong>' + esc(fmtDur(m.primaryDuration)) + '</strong><br>'
+    + esc(fmtDt(m.primaryStart)) + ' → ' + esc(fmtDt(m.primaryEnd)) + '<br>'
+    + '<button class="row-link" onclick="selectMeter(\'' + esc(meterKeyOf(m)) + '\', true)">' + esc(t('showInTable')) + '</button>'
+    + '</div>';
+}
+function zoomToMeter(key){
+  var m = markerByKey[key];
+  if(!m) return;
+  map.setView(m.getLatLng(), 15);
+  m.openPopup();
+}
+function selectMeter(key, scrollIntoView){
+  state.selectedKey = (state.selectedKey === key) ? null : key;
+  renderTable();
+  if(scrollIntoView && state.selectedKey){
+    var el = document.querySelector('tr.main[data-key="' + (window.CSS && CSS.escape ? CSS.escape(key) : key.replace(/"/g,'\\"')) + '"]');
+    if(el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  if(state.selectedKey && markerByKey[state.selectedKey]){
+    var mk = markerByKey[state.selectedKey];
+    map.setView(mk.getLatLng(), Math.max(map.getZoom(), 13));
+    mk.openPopup();
+  }
+  touchCacheExpiry();
+}
+
+// ── Wire up ──────────────────────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  if(f) handleFile(f);
+  e.target.value = '';
+});
+var dz = document.getElementById('uploadZone');
+['dragenter','dragover'].forEach(function(ev){
+  dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.add('drag'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag'); });
+});
+dz.addEventListener('drop', function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f) handleFile(f);
+});
+
+document.getElementById('unlockKeyInput').addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){ e.preventDefault(); submitUnlock(); }
+  else if(e.key === 'Escape'){ e.preventDefault(); cancelUnlock(); }
+});
+document.getElementById('unlockModal').addEventListener('click', function(e){
+  if(e.target === this) cancelUnlock();
+});
+
+document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 250));
+document.getElementById('sourceFilter').addEventListener('change', applyFilters);
+document.getElementById('minDur').addEventListener('input', debounce(applyFilters, 300));
+document.getElementById('maxDur').addEventListener('input', debounce(applyFilters, 300));
+
+document.querySelectorAll('#meterTable thead th').forEach(function(th){
+  th.addEventListener('click', function(){
+    var col = th.getAttribute('data-col');
+    if(!col) return;
+    if(state.sortCol === col){
+      state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      state.sortCol = col;
+      state.sortDir = (col === 'primaryDuration' || col === 'outageCount') ? 'desc' : 'asc';
+    }
+    applyFilters();
+  });
+});
+
+document.getElementById('meterBody').addEventListener('click', function(e){
+  var tr = e.target.closest('tr.main');
+  if(!tr) return;
+  var key = tr.getAttribute('data-key');
+  if(key) selectMeter(key, false);
+});
+
+function debounce(fn, ms){
+  var t; return function(){
+    var args = arguments, ctx = this;
+    clearTimeout(t);
+    t = setTimeout(function(){ fn.apply(ctx, args); }, ms);
+  };
+}
+
+// ── Restore last cache ───────────────────────────────────────────────────
+(async function init(){
+  // Free up any old localStorage payload cache from previous version (can be 10+ MB)
+  try{ localStorage.removeItem('cs_outages_last_v1'); }catch(e){}
+  // Clean up old remembered secret (no longer stored)
+  try{ localStorage.removeItem('cs_outages_unlock_v1'); }catch(e){}
+  try{
+    var cached = await loadCache();
+    if(cached && cached.payload){
+      ingest(cached.payload, cached.filename || '', { fromCache: true, savedAt: cached.savedAt || 0 });
+    }
+  }catch(e){
+    console.error('init cache restore failed:', e);
+  }
+})();
+</script>
+</body>
+</html>
