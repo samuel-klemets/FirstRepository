@@ -78,22 +78,22 @@
     transform: translateY(-2px);
   }
   .stat-amr {
-    background: rgba(235,245,255,0.55);
+    background: rgba(16,185,129,0.12);
   }
   .stat-amr .value {
-    color: oklch(48% 0.14 240);
+    color: #10b981;
   }
   .stat-dms {
-    background: rgba(232,248,245,0.52);
+    background: rgba(6,182,212,0.12);
   }
   .stat-dms .value {
-    color: oklch(46% 0.13 185);
+    color: #06b6d4;
   }
   .stat-man {
-    background: rgba(255,248,228,0.58);
+    background: rgba(245,158,11,0.14);
   }
   .stat-man .value {
-    color: oklch(50% 0.16 55);
+    color: #f59e0b;
   }
   .badge {
     padding: 2px 8px;
@@ -103,16 +103,16 @@
     border: 1px solid rgba(255,255,255,0.85);
   }
   .badge-dms {
-    background: rgba(220,235,255,0.70);
-    color: oklch(44% 0.14 240);
+    background: rgba(6,182,212,0.14);
+    color: #06b6d4;
   }
   .badge-amr {
-    background: rgba(210,245,238,0.70);
-    color: oklch(42% 0.13 185);
+    background: rgba(16,185,129,0.14);
+    color: #10b981;
   }
   .badge-man {
-    background: rgba(255,242,210,0.70);
-    color: oklch(46% 0.16 55);
+    background: rgba(245,158,11,0.16);
+    color: #f59e0b;
   }
   input, select {
     background: rgba(255,253,248,0.55);
@@ -174,22 +174,22 @@
     transform: translateY(-2px);
   }
   body .stat.amr {
-    background: rgba(235,245,255,0.55) !important;
+    background: rgba(16,185,129,0.12) !important;
   }
   body .stat.amr .val {
-    color: oklch(48% 0.14 240) !important;
+    color: #10b981 !important;
   }
   body .stat.dms {
-    background: rgba(232,248,245,0.52) !important;
+    background: rgba(6,182,212,0.12) !important;
   }
   body .stat.dms .val {
-    color: oklch(46% 0.13 185) !important;
+    color: #06b6d4 !important;
   }
   body .stat.man {
-    background: rgba(255,248,228,0.58) !important;
+    background: rgba(245,158,11,0.14) !important;
   }
   body .stat.man .val {
-    color: oklch(50% 0.16 55) !important;
+    color: #f59e0b !important;
   }
   .stat .val {
     color: rgba(40,28,16,0.82);
@@ -202,16 +202,16 @@
     box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset;
   }
   .pill-amr {
-    background: rgba(210,245,238,0.70);
-    color: oklch(42% 0.13 185);
+    background: rgba(16,185,129,0.14);
+    color: #047857;
   }
   .pill-dms {
-    background: rgba(220,235,255,0.70);
-    color: oklch(44% 0.14 240);
+    background: rgba(6,182,212,0.14);
+    color: #0e7490;
   }
   .pill-man {
-    background: rgba(255,242,210,0.70);
-    color: oklch(46% 0.16 55);
+    background: rgba(245,158,11,0.16);
+    color: #b45309;
   }
   .pill-pref, .pill-auto {
     background: rgba(255,253,248,0.55);
@@ -402,9 +402,9 @@
   :root{
     --bg:#f3f5f9; --card:#ffffff; --border:#e2e8f0; --muted:#5a6f85;
     --text:#0f172a; --primary:#4a6fa5; --primary-soft:#e8edf6;
-    --amr:#5a8c7a; --amr-soft:#e8f0ec;
-    --dms:#5a8e92; --dms-soft:#e8f0f1;
-    --man:#b89b6a; --man-soft:#f5f0e6;
+    --amr:#10b981; --amr-soft:rgba(16,185,129,.14);
+    --dms:#06b6d4; --dms-soft:rgba(6,182,212,.14);
+    --man:#f59e0b; --man-soft:rgba(245,158,11,.16);
     --danger:#b54a4a; --warn:#b89b6a;
     --shadow:0 2px 4px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.08);
   }
@@ -453,6 +453,7 @@
   .cs-cluster{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.8rem;border:2px solid #fff}
   .map-legend{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;font-size:.78rem}
   .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:.3rem;vertical-align:middle}
+  .source-ring{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:.3rem;vertical-align:middle;background:rgba(255,255,255,.75);border:2.5px solid currentColor;box-shadow:0 0 0 1px rgba(0,0,0,.04)}
   .duration-legend{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.55rem;padding:.45rem .6rem;border-radius:8px;font-size:.72rem}
   .duration-legend .tier{display:flex;align-items:center;gap:.25rem;white-space:nowrap}
   .duration-legend .tier-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
@@ -500,6 +501,10 @@
   .seg-badge-ignored{background:#f1f5f9;color:#64748b;font-weight:500}
   .seg-badge-pct{background:#fef3c7;color:#78350f}
   .seg-badge-pct-zero{background:#f1f5f9;color:#94a3b8;font-weight:500}
+  .comp-tier-legend{display:flex;align-items:center;flex-wrap:wrap;gap:.28rem .42rem;margin:.2rem 0 .45rem;padding:.34rem .5rem;border:1px solid rgba(255,255,255,.8);border-radius:999px;background:rgba(255,253,248,.42);font-size:.7rem}
+  .comp-tier-title{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--muted);margin-right:.25rem;white-space:nowrap}
+  .comp-tier-item{display:inline-flex;align-items:center;gap:.25rem;padding:.08rem .38rem;border:1px solid rgba(40,28,16,.08);border-radius:999px;background:rgba(255,255,255,.54);white-space:nowrap}
+  .comp-tier-dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.08);flex-shrink:0}
   .comp-breakdown{margin:.4rem 0 .1rem}
   .comp-breakdown-hdr{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--muted);margin:.55rem 0 .2rem}
   .comp-row{display:flex;align-items:center;flex-wrap:wrap;gap:.25rem .65rem;border-radius:7px;padding:.3rem .5rem;font-size:.8rem;margin-bottom:.18rem;background:var(--bg)}
@@ -612,9 +617,9 @@
         <div class="map-note" id="mapNote">Fyllningsfärg = avbrottstid, kantfärg = källa</div>
         <div class="duration-legend" id="durationLegend"></div>
         <div class="map-legend">
-          <span><span class="legend-dot" style="background:var(--amr)"></span><span data-i18n="amrLegend">AMR</span></span>
-          <span><span class="legend-dot" style="background:var(--dms)"></span><span data-i18n="dmsLegend">DMS</span></span>
-          <span><span class="legend-dot" style="background:var(--man)"></span><span data-i18n="manLegend">MAN (manuellt)</span></span>
+          <span style="color:#10b981"><span class="source-ring"></span><span data-i18n="amrLegend">AMR</span></span>
+          <span style="color:#06b6d4"><span class="source-ring"></span><span data-i18n="dmsLegend">DMS</span></span>
+          <span style="color:#f59e0b"><span class="source-ring"></span><span data-i18n="manLegend">MAN (manuellt)</span></span>
           <span class="footer-note" id="markerLegend" style="margin-left:auto">Kantfärg = vald källa</span>
         </div>
       </div>
@@ -748,6 +753,7 @@ var I18N = {
     countedSeg: 'RÄKNAD',
     ignoredShortSeg: 'ignorerad <3min',
     otherOutageRow: 'Separat avbrott',
+    compensationLevels: 'Ersättningsnivåer',
     compensationPeriods: 'Beräknade avbrott',
     interruptions: 'avbrott',
     interruption: 'avbrott',
@@ -839,6 +845,7 @@ var I18N = {
     countedSeg: 'LASKETTU',
     ignoredShortSeg: 'ohitettu <3min',
     otherOutageRow: 'Erillinen katko',
+    compensationLevels: 'Korvaustasot',
     compensationPeriods: 'Lasketut katkot',
     interruptions: 'katkoa',
     interruption: 'katko',
@@ -1533,12 +1540,14 @@ function renderDetailHtml(m){
 
     // Aggregate counted-window box: first qualifying start → last qualifying end, all % badges
     if(m.primaryStart != null && m.primaryEnd != null){
+      var countedPctSummary = getMeterPctSummary(m);
       html += '<div class="counted-win">'
         + '<span class="counted-win-lbl">' + esc(t('countedWindow')) + '</span>'
         + '<span class="counted-win-range mono">' + esc(fmtDt(m.primaryStart)) + ' &rarr; ' + esc(fmtDt(m.primaryEnd)) + '</span>'
         + '<span class="counted-win-dur dur">' + esc(fmtDur(m.primaryDuration)) + '</span>'
-        + pctBadge(m.primaryDuration)
+        + (countedPctSummary || pctBadge(m.primaryDuration))
         + '</div>';
+      html += renderCompTierLegend();
     }
 
     // Compensation tier breakdown — one row per outage row
@@ -1610,12 +1619,14 @@ function renderDetailHtml(m){
   } else {
     // Fallback for old exports: single counted-window header + flat segments with per-segment %
     if(m.primaryStart != null && m.primaryEnd != null){
+      var fallbackPctSummary = getMeterPctSummary(m);
       html += '<div class="counted-win">'
         + '<span class="counted-win-lbl">' + esc(t('countedWindow')) + '</span>'
         + '<span class="counted-win-range mono">' + esc(fmtDt(m.primaryStart)) + ' &rarr; ' + esc(fmtDt(m.primaryEnd)) + '</span>'
         + '<span class="counted-win-dur dur">' + esc(fmtDur(m.primaryDuration)) + '</span>'
-        + pctBadge(m.primaryDuration)
+        + (fallbackPctSummary || pctBadge(m.primaryDuration))
         + '</div>';
+      html += renderCompTierLegend();
     }
     if(!segs.length){
       html += '<div class="muted" style="margin-top:.3rem">' + esc(t('noSegmentData')) + '</div>';
@@ -1728,6 +1739,14 @@ function renderDurationLegend(){
     html += '<span class="tier"><span class="tier-dot" style="background:' + tiers[i].fill + '"></span>' + esc(tiers[i].label) + '</span>';
   }
   document.getElementById('durationLegend').innerHTML = html;
+}
+function renderCompTierLegend(){
+  var tiers = getDurationTiers();
+  var html = '<div class="comp-tier-legend"><span class="comp-tier-title">' + esc(t('compensationLevels')) + '</span>';
+  for(var i = 2; i < tiers.length; i++){
+    html += '<span class="comp-tier-item"><span class="comp-tier-dot" style="background:' + esc(tiers[i].fill) + '"></span>' + esc(tiers[i].label) + '</span>';
+  }
+  return html + '</div>';
 }
 function renderMap(){
   if(!map) return;
