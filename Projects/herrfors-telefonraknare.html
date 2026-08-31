@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d2d2a">
+  <title>Herrfors telefonräknare</title>
+  <style>
+    :root {
+      --ink: #153532;
+      --ink-soft: #55706b;
+      --forest: #0d2d2a;
+      --forest-2: #16453f;
+      --mint: #bce9d5;
+      --mint-strong: #83d5b2;
+      --paper: #f5f8f4;
+      --card: rgba(255, 255, 255, 0.88);
+      --line: #dce9e1;
+      --warm: #f6c66a;
+      --shadow: 0 24px 70px rgba(20, 54, 45, 0.12);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 91% 3%, rgba(188, 233, 213, 0.72), transparent 28rem),
+        radial-gradient(circle at 4% 38%, rgba(246, 198, 106, 0.17), transparent 23rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    button, input { font: inherit; }
+
+    button { cursor: pointer; }
+
+    .page-shell {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 25px 0 46px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 58px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--forest);
+      font-size: 0.98rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 13px;
+      color: var(--forest);
+      background: var(--mint);
+      box-shadow: inset 0 -4px 0 rgba(13, 45, 42, 0.08);
+      font-weight: 900;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(13, 45, 42, 0.1);
+      border-radius: 999px;
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.56);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #41ae7d;
+      box-shadow: 0 0 0 4px rgba(65, 174, 125, 0.15);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.07fr) minmax(300px, 0.93fr);
+      align-items: end;
+      gap: 52px;
+      margin-bottom: 30px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 17px;
+      color: #267b67;
+      font-size: 0.77rem;
+      font-weight: 850;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 24px;
+      height: 2px;
+      content: "";
+      background: var(--mint-strong);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 700px;
+      margin-bottom: 17px;
+      color: var(--forest);
+      font-size: clamp(2.6rem, 6vw, 5.5rem);
+      font-weight: 850;
+      letter-spacing: -0.075em;
+      line-height: 0.94;
+    }
+
+    .hero-copy {
+      max-width: 590px;
+      margin-bottom: 0;
+      color: var(--ink-soft);
+      font-size: clamp(1rem, 1.8vw, 1.18rem);
+    }
+
+    .hero-aside {
+      padding: 22px 24px;
+      border: 1px solid rgba(13, 45, 42, 0.09);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .hero-aside-label {
+      margin-bottom: 7px;
+      color: var(--ink-soft);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .hero-aside strong {
+      display: block;
+      color: var(--forest);
+      font-size: 1.42rem;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-aside p {
+      margin: 4px 0 0;
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      border: 1px solid rgba(13, 45, 42, 0.08);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .input-card {
+      padding: clamp(22px, 4vw, 38px);
+    }
+
+    .card-kicker {
+      margin-bottom: 8px;
+      color: #2c7b68;
+      font-size: 0.76rem;
+      font-weight: 850;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .input-card h2,
+    .details h2 {
+      margin-bottom: 10px;
+      color: var(--forest);
+      font-size: clamp(1.45rem, 2.5vw, 2rem);
+      letter-spacing: -0.045em;
+      line-height: 1.05;
+    }
+
+    .card-intro {
+      margin-bottom: 27px;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+
+    .input-mode-caption {
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .input-mode {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 9px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f2f7f3;
+    }
+
+    .input-mode button {
+      min-height: 39px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 10px;
+      color: var(--ink-soft);
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 800;
+      transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .input-mode button:hover,
+    .input-mode button:focus-visible {
+      color: var(--forest);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .input-mode button.active {
+      color: #fff;
+      background: var(--forest);
+      box-shadow: 0 4px 10px rgba(13, 45, 42, 0.15);
+    }
+
+    .input-mode-help {
+      min-height: 36px;
+      margin: 0 0 20px;
+      color: var(--ink-soft);
+      font-size: 0.77rem;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+      color: var(--ink);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .field-label span {
+      color: var(--ink-soft);
+      font-size: 0.77rem;
+      font-weight: 650;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .price-input {
+      width: 100%;
+      padding: 15px 58px 15px 17px;
+      border: 1.5px solid #cfe0d6;
+      border-radius: 15px;
+      outline: none;
+      color: var(--forest);
+      background: #fff;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .price-input:focus {
+      border-color: #3a9c7c;
+      box-shadow: 0 0 0 4px rgba(58, 156, 124, 0.15);
+    }
+
+    .euro-suffix {
+      position: absolute;
+      top: 50%;
+      right: 18px;
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+      font-weight: 750;
+      pointer-events: none;
+      transform: translateY(-50%);
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 20px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      accent-color: #3a9c7c;
+      cursor: pointer;
+    }
+
+    .range-hint {
+      color: var(--ink-soft);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .quick-choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 29px;
+    }
+
+    .quick-choices button {
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink-soft);
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 750;
+      transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .quick-choices button:hover,
+    .quick-choices button:focus-visible {
+      border-color: #6fbea0;
+      color: var(--forest);
+      background: #effaf3;
+      transform: translateY(-1px);
+    }
+
+    .budget-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px;
+      border-radius: 16px;
+      background: #f0f8f2;
+    }
+
+    .budget-icon {
+      display: grid;
+      flex: 0 0 29px;
+      width: 29px;
+      height: 29px;
+      place-items: center;
+      border-radius: 9px;
+      color: var(--forest);
+      background: var(--mint);
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+
+    .budget-box strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--forest);
+      font-size: 0.86rem;
+    }
+
+    .budget-box p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 0.78rem;
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 100%;
+      padding: clamp(25px, 4vw, 40px);
+      color: #f6fff9;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(131, 213, 178, 0.26), transparent 23rem),
+        linear-gradient(145deg, #103c35 0%, #0b2927 100%);
+    }
+
+    .result-card::after {
+      position: absolute;
+      right: -56px;
+      bottom: -62px;
+      width: 220px;
+      height: 220px;
+      border: 1px solid rgba(188, 233, 213, 0.18);
+      border-radius: 50%;
+      box-shadow: 0 0 0 24px rgba(188, 233, 213, 0.035), 0 0 0 49px rgba(188, 233, 213, 0.025);
+      content: "";
+      pointer-events: none;
+    }
+
+    .result-content { position: relative; z-index: 1; }
+
+    .result-label {
+      margin-bottom: 8px;
+      color: #a9d5c1;
+      font-size: 0.77rem;
+      font-weight: 850;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .result-card h2 {
+      max-width: 380px;
+      margin-bottom: 25px;
+      color: #fff;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      letter-spacing: -0.06em;
+      line-height: 1;
+    }
+
+    .result-amount {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      column-gap: 10px;
+      row-gap: 2px;
+      margin-bottom: 8px;
+      color: var(--mint);
+      font-size: clamp(3.3rem, 8vw, 5.8rem);
+      font-weight: 850;
+      letter-spacing: -0.09em;
+      line-height: 0.94;
+    }
+
+    .result-amount .currency {
+      color: #d2eee0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .result-subtitle {
+      margin-bottom: 29px;
+      color: #c2ded1;
+      font-size: 0.88rem;
+    }
+
+    .split-bar-wrap { margin-bottom: 29px; }
+
+    .split-bar-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+      color: #d4ebe0;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .split-bar {
+      display: flex;
+      overflow: hidden;
+      height: 13px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .bar-herrfors {
+      width: 50%;
+      min-width: 0;
+      background: var(--mint-strong);
+      transition: width 220ms ease;
+    }
+
+    .bar-employee {
+      flex: 1;
+      min-width: 0;
+      background: var(--warm);
+      transition: width 220ms ease;
+    }
+
+    .split-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 11px;
+      color: #c2ded1;
+      font-size: 0.76rem;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.herrfors { background: var(--mint-strong); }
+    .legend-dot.employee { background: var(--warm); }
+
+    .result-divider {
+      height: 1px;
+      margin: 0 0 20px;
+      background: rgba(224, 247, 234, 0.16);
+    }
+
+    .result-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .result-meta-label {
+      margin-bottom: 4px;
+      color: #a9d5c1;
+      font-size: 0.74rem;
+    }
+
+    .result-meta strong {
+      color: #fff;
+      font-size: 1.1rem;
+      letter-spacing: -0.035em;
+    }
+
+    .details {
+      padding: clamp(22px, 4vw, 38px);
+    }
+
+    .details-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .details-head p {
+      max-width: 360px;
+      margin-bottom: 0;
+      color: var(--ink-soft);
+      font-size: 0.87rem;
+      text-align: right;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 13px;
+    }
+
+    .step {
+      min-width: 0;
+      padding: 19px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: rgba(248, 252, 248, 0.82);
+    }
+
+    .step-number {
+      display: grid;
+      width: 29px;
+      height: 29px;
+      margin-bottom: 15px;
+      place-items: center;
+      border-radius: 10px;
+      color: var(--forest);
+      background: var(--mint);
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .step:nth-child(2) .step-number {
+      background: #dceff1;
+    }
+
+    .step:nth-child(3) .step-number {
+      background: #ffe4a7;
+    }
+
+    .step h3 {
+      margin-bottom: 6px;
+      color: var(--forest);
+      font-size: 0.98rem;
+      letter-spacing: -0.025em;
+    }
+
+    .step p {
+      min-height: 42px;
+      margin-bottom: 15px;
+      color: var(--ink-soft);
+      font-size: 0.79rem;
+    }
+
+    .step-values {
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+    }
+
+    .value-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 6px 0;
+      color: var(--ink-soft);
+      font-size: 0.75rem;
+    }
+
+    .value-line strong {
+      color: var(--ink);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .value-line.total {
+      margin-top: 10px;
+      color: var(--forest);
+      font-weight: 800;
+    }
+
+    .value-line.total strong {
+      color: #267b67;
+      font-size: 0.9rem;
+    }
+
+    .formula-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 21px;
+      align-items: stretch;
+      margin-top: 22px;
+      padding: clamp(22px, 4vw, 30px);
+      border-radius: var(--radius-lg);
+      color: #e9f8ef;
+      background: var(--forest);
+    }
+
+    .formula-panel h2 {
+      margin-bottom: 10px;
+      color: #fff;
+      font-size: clamp(1.35rem, 2.3vw, 1.8rem);
+      letter-spacing: -0.045em;
+      line-height: 1.05;
+    }
+
+    .formula-panel p {
+      max-width: 390px;
+      margin-bottom: 0;
+      color: #b7d4c5;
+      font-size: 0.85rem;
+    }
+
+    .formula-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .formula {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(188, 233, 213, 0.16);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.055);
+      font-size: 0.79rem;
+    }
+
+    .formula .formula-label { color: #b7d4c5; }
+
+    .formula strong {
+      color: #fff;
+      font-size: 0.81rem;
+      text-align: right;
+    }
+
+    .ownership-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      margin-top: 22px;
+      padding: 17px 19px;
+      border: 1px solid #f0d793;
+      border-radius: 17px;
+      background: #fff9e9;
+    }
+
+    .ownership-icon {
+      display: grid;
+      flex: 0 0 29px;
+      width: 29px;
+      height: 29px;
+      place-items: center;
+      border-radius: 9px;
+      color: #684b0d;
+      background: #ffe4a7;
+      font-size: 0.85rem;
+      font-weight: 900;
+    }
+
+    .ownership-note strong {
+      display: block;
+      margin-bottom: 3px;
+      color: #604b1c;
+      font-size: 0.87rem;
+    }
+
+    .ownership-note p {
+      margin: 0;
+      color: #7a673a;
+      font-size: 0.79rem;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 20px;
+      padding: 0 5px;
+      color: var(--ink-soft);
+      font-size: 0.73rem;
+    }
+
+    .footer p { margin: 0; }
+
+    .footer strong { color: var(--forest); }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    @media (max-width: 820px) {
+      .hero,
+      .calculator,
+      .formula-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .hero { gap: 24px; }
+      .hero-aside { max-width: 500px; }
+      .steps { grid-template-columns: 1fr; }
+      .step p { min-height: auto; }
+      .details-head { align-items: start; flex-direction: column; gap: 7px; }
+      .details-head p { text-align: left; }
+    }
+
+    @media (max-width: 560px) {
+      .page-shell {
+        width: min(100% - 24px, 1180px);
+        padding-top: 17px;
+      }
+
+      .topbar { margin-bottom: 43px; }
+      .status-chip { padding: 7px 9px; font-size: 0.7rem; }
+      h1 { font-size: clamp(2.65rem, 16vw, 4.5rem); }
+      .result-meta { grid-template-columns: 1fr; gap: 11px; }
+      .result-amount { font-size: clamp(3.7rem, 20vw, 5.8rem); }
+      .formula { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .formula strong { text-align: left; }
+      .footer { align-items: flex-start; flex-direction: column; gap: 5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Herrfors">
+        <span class="brand-mark" aria-hidden="true">H</span>
+        <span>Herrfors</span>
+      </div>
+      <div class="status-chip"><span class="status-dot" aria-hidden="true"></span> Intern telefonpolicy</div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <div class="eyebrow">Telefonräknare</div>
+        <h1 id="page-title">Vad blir ditt löneavdrag?</h1>
+        <p class="hero-copy">Ändra telefonens pris och se direkt hur stor egenandel du får betala. Räknaren visar allt tydligt – både exklusive och inklusive moms.</p>
+      </div>
+      <aside class="hero-aside">
+        <div class="hero-aside-label">Standard i policyn</div>
+        <strong>500 € exkl. moms</strong>
+        <p>Herrfors står för telefonen upp till detta belopp.</p>
+      </aside>
+    </section>
+
+    <section class="calculator" aria-label="Telefonräknare">
+      <article class="card input-card">
+        <div class="card-kicker">Steg 1 · Ange pris</div>
+        <h2>Telefonens pris</h2>
+        <p class="card-intro">Skriv in telefonens pris <strong id="inputBasis">exklusive moms</strong>. Standardvärdet är <span id="standardPrice">800,00 €</span> i detta läge.</p>
+
+        <div class="input-mode-caption">Jag anger telefonens pris som</div>
+        <div class="input-mode" role="group" aria-label="Välj hur telefonens pris ska anges">
+          <button type="button" class="active" data-input-mode="excl" aria-pressed="true">Exkl. moms</button>
+          <button type="button" data-input-mode="incl" aria-pressed="false">Inkl. moms</button>
+        </div>
+        <p id="inputModeHelp" class="input-mode-help">Du skriver priset exklusive moms. Räknaren lägger till 25,5 % där det behövs.</p>
+
+        <label id="priceLabel" class="field-label" for="priceInput">
+          Pris exkl. moms
+          <span>25,5 % moms används</span>
+        </label>
+        <div class="input-wrap">
+          <input id="priceInput" class="price-input" type="number" min="0" max="999999" step="0.01" value="800" inputmode="decimal" aria-describedby="priceHelp">
+          <span class="euro-suffix" aria-hidden="true">€</span>
+        </div>
+        <div id="priceHelp" class="visually-hidden">Ange ett belopp i euro exklusive moms.</div>
+
+        <div class="range-row">
+          <input id="priceRange" type="range" min="0" max="1200" step="1" value="800" aria-label="Telefonens pris exklusive moms, justerare">
+          <span class="range-hint">0–1 200 €</span>
+        </div>
+
+        <div class="quick-choices" aria-label="Snabbval">
+          <button type="button" data-price-excl="500">500 €</button>
+          <button type="button" data-price-excl="800">800 €</button>
+          <button type="button" data-price-excl="1200">1 200 €</button>
+        </div>
+
+        <div class="budget-box">
+          <span class="budget-icon" aria-hidden="true">✓</span>
+          <div>
+            <strong>Herrfors standardbudget: 500 € exkl. moms</strong>
+            <p>Väljer du en dyrare telefon betalar du mellanskillnaden inklusive moms.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="card result-card" aria-live="polite">
+        <div class="result-content">
+          <div class="result-label">Ditt resultat</div>
+          <h2>Egenandel som dras från lönen</h2>
+          <div class="result-amount"><span id="salaryDeduction">376,50</span><span class="currency">€</span></div>
+          <p class="result-subtitle">inklusive moms · löneavdrag efter att telefonen levererats</p>
+
+          <div class="split-bar-wrap">
+            <div class="split-bar-header">
+              <span>Så delas priset exkl. moms</span>
+              <span id="splitTotal">800,00 € totalt</span>
+            </div>
+            <div class="split-bar" aria-hidden="true">
+              <span id="herrforsBar" class="bar-herrfors"></span>
+              <span id="employeeBar" class="bar-employee"></span>
+            </div>
+            <div class="split-legend">
+              <span class="legend-item"><span class="legend-dot herrfors"></span> Herrfors <strong id="herrforsBarLabel">500,00 €</strong></span>
+              <span class="legend-item"><span class="legend-dot employee"></span> Du <strong id="employeeBarLabel">300,00 €</strong></span>
+            </div>
+          </div>
+
+          <div class="result-divider"></div>
+          <div class="result-meta">
+            <div>
+              <div class="result-meta-label">Herrfors betalar inkl. moms</div>
+              <strong id="herrforsIncl">627,50 €</strong>
+            </div>
+            <div>
+              <div class="result-meta-label">Din egenandel exkl. moms</div>
+              <strong id="employeeExcl">300,00 €</strong>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="card details" aria-labelledby="details-title">
+      <div class="details-head">
+        <div>
+          <div class="card-kicker">Steg 2–4 · Så fungerar det</div>
+          <h2 id="details-title">Från telefonpris till löneavdrag</h2>
+        </div>
+        <p>Räknaren delar upp priset i Herrfors andel och din egenandel. Momsen på din egenandel ingår i löneavdraget.</p>
+      </div>
+
+      <div class="steps">
+        <article class="step">
+          <div class="step-number">2</div>
+          <h3>Telefonens totalpris</h3>
+          <p>Först räknas momsen på hela telefonens pris för att visa vad priset blir inklusive moms.</p>
+          <div class="step-values">
+            <div class="value-line"><span>Pris exkl. moms</span><strong id="phoneExcl">800,00 €</strong></div>
+            <div class="value-line"><span>Moms 25,5 %</span><strong id="phoneVat">204,00 €</strong></div>
+            <div class="value-line total"><span>Pris inkl. moms</span><strong id="phoneIncl">1 004,00 €</strong></div>
+          </div>
+        </article>
+
+        <article class="step">
+          <div class="step-number">3</div>
+          <h3>Herrfors andel</h3>
+          <p>Herrfors betalar upp till 500 € exklusive moms. Om telefonen är billigare betalar Herrfors hela priset.</p>
+          <div class="step-values">
+            <div class="value-line"><span>Andel exkl. moms</span><strong id="herrforsExcl">500,00 €</strong></div>
+            <div class="value-line"><span>Moms 25,5 %</span><strong id="herrforsVat">127,50 €</strong></div>
+            <div class="value-line total"><span>Andel inkl. moms</span><strong id="herrforsTotal">627,50 €</strong></div>
+          </div>
+        </article>
+
+        <article class="step">
+          <div class="step-number">4</div>
+          <h3>Din egenandel</h3>
+          <p>Endast delen över Herrfors standardbudget blir din egenandel. Den dras från lönen inklusive moms.</p>
+          <div class="step-values">
+            <div class="value-line"><span>Egenandel exkl. moms</span><strong id="employeeExclDetail">300,00 €</strong></div>
+            <div class="value-line"><span>Moms på egenandel</span><strong id="employeeVat">76,50 €</strong></div>
+            <div class="value-line total"><span>Dras från lönen</span><strong id="employeeTotal">376,50 €</strong></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="formula-panel">
+        <div>
+          <h2>Tre enkla regler</h2>
+          <p>Beloppet du själv betalar är alltid mellanskillnaden över 500 € – och momsen på just den mellanskillnaden läggs till.</p>
+        </div>
+        <div class="formula-list">
+          <div class="formula"><span class="formula-label">Egenandel exkl. moms</span><strong>telefonpris − 500 €</strong></div>
+          <div class="formula"><span class="formula-label">Moms på egenandel</span><strong>egenandel × 25,5 %</strong></div>
+          <div class="formula"><span class="formula-label">Löneavdrag</span><strong>egenandel + moms på egenandel</strong></div>
+        </div>
+      </div>
+
+      <div class="ownership-note">
+        <span class="ownership-icon" aria-hidden="true">i</span>
+        <div>
+          <strong>Telefonen ägs av Herrfors</strong>
+          <p>Även om du betalar en egenandel för en dyrare modell är telefonen Herrfors egendom och ska återlämnas när anställningen upphör.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p><strong>Herrfors telefonräknare</strong> · 25,5 % moms</p>
+      <p>Räknaren visar belopp enligt angiven telefonpolicy.</p>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const BUDGET_EXCL = 500;
+      const VAT_RATE = 0.255;
+      const VAT_FACTOR = 1 + VAT_RATE;
+      const money = new Intl.NumberFormat('sv-FI', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const priceInput = document.querySelector('#priceInput');
+      const priceRange = document.querySelector('#priceRange');
+      const modeButtons = document.querySelectorAll('[data-input-mode]');
+      const quickButtons = document.querySelectorAll('[data-price-excl]');
+      const inputBasis = document.querySelector('#inputBasis');
+      const standardPrice = document.querySelector('#standardPrice');
+      const inputModeHelp = document.querySelector('#inputModeHelp');
+      const priceLabel = document.querySelector('#priceLabel');
+      let inputMode = 'excl';
+
+      const fields = {
+        salaryDeduction: document.querySelector('#salaryDeduction'),
+        splitTotal: document.querySelector('#splitTotal'),
+        herrforsBar: document.querySelector('#herrforsBar'),
+        employeeBar: document.querySelector('#employeeBar'),
+        herrforsBarLabel: document.querySelector('#herrforsBarLabel'),
+        employeeBarLabel: document.querySelector('#employeeBarLabel'),
+        herrforsIncl: document.querySelector('#herrforsIncl'),
+        employeeExcl: document.querySelector('#employeeExcl'),
+        phoneExcl: document.querySelector('#phoneExcl'),
+        phoneVat: document.querySelector('#phoneVat'),
+        phoneIncl: document.querySelector('#phoneIncl'),
+        herrforsExcl: document.querySelector('#herrforsExcl'),
+        herrforsVat: document.querySelector('#herrforsVat'),
+        herrforsTotal: document.querySelector('#herrforsTotal'),
+        employeeExclDetail: document.querySelector('#employeeExclDetail'),
+        employeeVat: document.querySelector('#employeeVat'),
+        employeeTotal: document.querySelector('#employeeTotal')
+      };
+
+      const euro = (value) => `${money.format(value)} €`;
+      const displayedNumber = () => {
+        const parsed = Number.parseFloat(String(priceInput.value).replace(',', '.'));
+        return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+      };
+
+      const priceExclFromInput = () => inputMode === 'incl' ? displayedNumber() / VAT_FACTOR : displayedNumber();
+
+      const setDisplayedPrice = (priceExcl) => {
+        const displayedPrice = inputMode === 'incl' ? priceExcl * VAT_FACTOR : priceExcl;
+        priceInput.value = Number(displayedPrice.toFixed(2)).toString();
+      };
+
+      function updateInputMode() {
+        const includingVat = inputMode === 'incl';
+        modeButtons.forEach((button) => {
+          const isActive = button.dataset.inputMode === inputMode;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+        inputBasis.textContent = includingVat ? 'inklusive moms' : 'exklusive moms';
+        standardPrice.textContent = euro(includingVat ? 800 * VAT_FACTOR : 800);
+        priceLabel.childNodes[0].textContent = includingVat ? 'Pris inkl. moms' : 'Pris exkl. moms';
+        priceRange.setAttribute('aria-label', includingVat ? 'Telefonens pris inklusive moms, justerare' : 'Telefonens pris exklusive moms, justerare');
+        inputModeHelp.textContent = includingVat
+          ? 'Du skriver priset inklusive 25,5 % moms. Räknaren räknar om det till exklusive moms i bakgrunden.'
+          : 'Du skriver priset exklusive moms. Räknaren lägger till 25,5 % där det behövs.';
+        quickButtons.forEach((button) => {
+          const priceExcl = Number(button.dataset.priceExcl);
+          button.textContent = euro(includingVat ? priceExcl * VAT_FACTOR : priceExcl);
+        });
+      }
+
+      function calculate(priceExcl) {
+        const herrforsExcl = Math.min(priceExcl, BUDGET_EXCL);
+        const employeeExcl = Math.max(priceExcl - BUDGET_EXCL, 0);
+        const phoneVat = priceExcl * VAT_RATE;
+        const herrforsVat = herrforsExcl * VAT_RATE;
+        const employeeVat = employeeExcl * VAT_RATE;
+        return {
+          priceExcl,
+          priceIncl: priceExcl + phoneVat,
+          phoneVat,
+          herrforsExcl,
+          herrforsVat,
+          herrforsIncl: herrforsExcl + herrforsVat,
+          employeeExcl,
+          employeeVat,
+          employeeIncl: employeeExcl + employeeVat
+        };
+      }
+
+      function render() {
+        const values = calculate(priceExclFromInput());
+        const totalExcl = values.priceExcl || 1;
+        const herrforsPercent = Math.min((values.herrforsExcl / totalExcl) * 100, 100);
+
+        fields.salaryDeduction.textContent = money.format(values.employeeIncl);
+        fields.splitTotal.textContent = `${euro(values.priceExcl)} totalt`;
+        fields.herrforsBar.style.width = `${herrforsPercent}%`;
+        fields.employeeBar.style.display = values.employeeExcl > 0 ? '' : 'none';
+        fields.herrforsBarLabel.textContent = euro(values.herrforsExcl);
+        fields.employeeBarLabel.textContent = euro(values.employeeExcl);
+        fields.herrforsIncl.textContent = euro(values.herrforsIncl);
+        fields.employeeExcl.textContent = euro(values.employeeExcl);
+
+        fields.phoneExcl.textContent = euro(values.priceExcl);
+        fields.phoneVat.textContent = euro(values.phoneVat);
+        fields.phoneIncl.textContent = euro(values.priceIncl);
+        fields.herrforsExcl.textContent = euro(values.herrforsExcl);
+        fields.herrforsVat.textContent = euro(values.herrforsVat);
+        fields.herrforsTotal.textContent = euro(values.herrforsIncl);
+        fields.employeeExclDetail.textContent = euro(values.employeeExcl);
+        fields.employeeVat.textContent = euro(values.employeeVat);
+        fields.employeeTotal.textContent = euro(values.employeeIncl);
+
+        const displayedPrice = inputMode === 'incl' ? values.priceIncl : values.priceExcl;
+        priceRange.value = String(Math.min(displayedPrice, Number(priceRange.max)));
+      }
+
+      modeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const currentPriceExcl = priceExclFromInput();
+          inputMode = button.dataset.inputMode;
+          setDisplayedPrice(currentPriceExcl);
+          updateInputMode();
+          render();
+        });
+      });
+      priceInput.addEventListener('input', render);
+      priceRange.addEventListener('input', () => {
+        priceInput.value = priceRange.value;
+        render();
+      });
+      quickButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          setDisplayedPrice(Number(button.dataset.priceExcl));
+          render();
+        });
+      });
+
+      updateInputMode();
+      render();
+    })();
+  </script>
+</body>
+</html>
